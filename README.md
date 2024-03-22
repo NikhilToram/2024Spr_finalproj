@@ -8,7 +8,7 @@ We are open to evaluating and testing various algorithms based on the final size
 ## References: 
 <ul>
   <li>Traditional Dots and Boxes: <a>https://gametable.org/games/dots-and-boxes/</a></li>
-  <li>A project dealing with a traditional Dots and Boxes game: <a>https://github.com/Armando8766/Dots-and-Boxes.git</a></li>
+  <li>A project dealing with a traditional Dots and Boxes game: https://github.com/Armando8766/Dots-and-Boxes.git</li>
   <li>Pattern theory: <a>https://www.youtube.com/watch?v=48sCx-wBs34</a></li>
 </ul>
 
