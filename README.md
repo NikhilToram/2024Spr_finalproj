@@ -5,6 +5,7 @@ For our version of the game Dots and Boxes, we will make an irregular grid patte
 
 We are open to evaluating and testing various algorithms based on the final size of the puzzle, but we do think a minimax-based algorithm and alpha-beta pruning and/or localized gameplays based on the unique shape would be a good fit. We intend to utilize the features of Network X for this project.
 
-References: 
+## References: 
 
 Traditional Dots and Boxes: <a>https://gametable.org/games/dots-and-boxes/</a>
+Pattern theory: <a>https://www.youtube.com/watch?v=48sCx-wBs34</a>
