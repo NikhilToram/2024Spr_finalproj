@@ -8,10 +8,10 @@ def ask_for_selection():
 
 
 def selection(board: nx.Graph, node1:int, node2: int, player) -> nx.Graph:
-    already_played = []
+    still_legal_moves = [tuple(sorted(edge[0], edge[1])) for edge in board.edges()]
     color = {'player1': 'red', 'player2': 'lightskyblue'}
-    if tuple(sorted(node1, node2)) in already_played:
-        print("This move has already been played. Please try again.")
+    if tuple(sorted(node1, node2)) not in still_legal_moves:
+        print("This move is not legal. Please try again.")
         ask_for_selection()
     else:
         already_played.append(tuple(sorted(node1, node2)))
