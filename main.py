@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 
 class Board:
     def __init__(self):
+        self.style_dict = {'unplayed': 'dashed', 'unplayable': 'solid'}
+        self.color_dict = {'unplayed': 'black', 'unplayable': 'white'}
         self.dim = self.select_dimension()
         self.board, self.positions = self.create_base_board()
         self.legal_moves = [tuple(sorted([edge[0], edge[1]])) for edge in nx.edges(self.board)]
@@ -27,7 +29,7 @@ class Board:
         else:
             print(f' You have chosen an invalid input. '
                   f'Please enter the number corresponding to the size of game you want to play. \ni.e., 1, 2, or 3.')
-            return self.select_dimention()
+            return self.select_dimension()
     def create_base_board(self):
         regular_lattice = nx.grid_2d_graph(self.dim[0], self.dim[1])
         pos = {(x, y): (y, -x) for x, y in regular_lattice.nodes()}
@@ -37,7 +39,7 @@ class Board:
         for x, y in initial_nodes:
             if ((x, y+1) in initial_nodes) and \
                 ((x+1, y+1) in initial_nodes) and \
-                ((x+1, y) in initial_nodes):
+                    ((x+1, y) in initial_nodes):
                 regular_lattice.add_node((x+0.5, y+0.5), NodeType='shape')
                 regular_lattice.add_edge((x+0.5, y+0.5), (x, y), EdgeType='unplayable')
                 regular_lattice.add_edge((x + 0.5, y + 0.5), (x, y+1), EdgeType='unplayable')
@@ -48,7 +50,10 @@ class Board:
             print(f"for node {node} NodeType is: {regular_lattice.nodes[node]['NodeType']}")
         for edge in regular_lattice.edges():
             print(f"for edge connecting {edge} EdgeType is: {regular_lattice[edge[0]][edge[1]]['EdgeType']}")
-        nx.draw(regular_lattice, pos=pos, with_labels=True, node_color='skyblue', node_size=250, font_size=12)
+        EdgeType = nx.get_edge_attributes(regular_lattice, 'EdgeType').values()
+        nx.draw_networkx(regular_lattice, pos=pos, with_labels=True, node_color='darkgrey', node_size=250,
+                         edge_color=[self.color_dict[Edge] for Edge in EdgeType],
+                         font_size=5, style=[self.style_dict[Edge] for Edge in EdgeType])
         plt.title("Regular 2d")
         plt.figure(dpi=500)
         plt.show()
