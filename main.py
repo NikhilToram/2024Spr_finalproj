@@ -8,7 +8,7 @@ class Board:
     def __init__(self):
         self.dim = self.select_dimention()
         self.board, self.positions = self.create_base_board()
-        self.legal_moves = [tuple(sorted(edge[0], edge[1])) for edge in nx.edges(self.board)]
+        self.legal_moves = [tuple(sorted([edge[0], edge[1]])) for edge in nx.edges(self.board)]
 
     def select_dimention(self):
         option = input(f'Please select the number of the game size that you want to play. \n '
@@ -32,7 +32,7 @@ class Board:
         plt.title("Regular 2d")
         plt.figure(dpi=500)
         plt.show()
-        return nx, pos
+        return regular_lattice, pos
 
 
 def ask_for_selection():
