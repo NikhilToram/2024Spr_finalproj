@@ -6,15 +6,16 @@ import matplotlib.pyplot as plt
 
 class Board:
     def __init__(self):
-        self.dim = self.select_dimention()
+        self.dim = self.select_dimension()
         self.board, self.positions = self.create_base_board()
         self.legal_moves = [tuple(sorted([edge[0], edge[1]])) for edge in nx.edges(self.board)]
 
-    def select_dimention(self):
+    def select_dimension(self):
         option = input(f'Please select the number of the game size that you want to play. \n '
                        f'1. Small [4x4 game]\n '
                        f'2. Meduim [7x7 game]\n '
-                       f'3. Large [10x10 game]')
+                       f'3. Large [10x10 game]\n'
+                       f'Your selection: ')
         if int(option) == 1:
             return [4, 4]
         elif int(option) == 2:
