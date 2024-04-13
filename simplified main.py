@@ -8,3 +8,6 @@ nx.draw(regular_lattice, pos=pos, with_labels=True, node_color='skyblue', node_s
 plt.title("Regular 2d")
 plt.figure(dpi=500)
 plt.show()
+
+
+
