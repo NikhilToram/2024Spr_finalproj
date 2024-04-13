@@ -1,6 +1,7 @@
 import copy
 import networkx as nx
 import pygame
+from pygame.locals import *
 
 class Board:
     def __init__(self):
@@ -52,35 +53,53 @@ class Board:
                 pos[(x+0.5, y+0.5)] = ((y+0.5) * 100 + 50, (x+0.5) * 100 + 50)
         return regular_lattice, pos
 
+    # def draw_board(self):
+    #     # # Calculate the dimensions of the board
+    #     # max_x = max(pos[0] for pos in self.positions.values())
+    #     # min_x = min(pos[0] for pos in self.positions.values())
+    #     # max_y = max(pos[1] for pos in self.positions.values())
+    #     # min_y = min(pos[1] for pos in self.positions.values())
+    #     #
+    #     # # Calculate the center of the board
+    #     # center_x = (max_x + min_x) / 2
+    #     # center_y = (max_y + min_y) / 2
+    #     #
+    #     # # Calculate the offset to center the board
+    #     # offset_x = 600 - center_x  # Half of the screen width is 600
+    #     # offset_y = 600 - center_y  # Assuming a square display
+    #
+    #     screen = pygame.display.set_mode((800, 600),HWSURFACE|DOUBLEBUF|RESIZABLE)
+    #     # screen.blit(pygame.transform.scale())
+    #     screen.fill((255, 255, 255))
+    #     for edge in self.board.edges():
+    #         # Adjust the positions based on the offset
+    #         adjusted_start = (self.positions[edge[0]][0], self.positions[edge[0]][1])
+    #         adjusted_end = (self.positions[edge[1]][0], self.positions[edge[1]][1])
+    #         pygame.draw.line(screen, self.color_dict[self.board[edge[0]][edge[1]]['EdgeType']],
+    #                          adjusted_start, adjusted_end, 3)
+    #     for node in self.board.nodes():
+    #         # Adjust the positions based on the offset
+    #         adjusted_pos = (self.positions[node][0], self.positions[node][1])
+    #         pygame.draw.circle(screen, (0, 0, 0), adjusted_pos, 20)
+    #     pygame.display.flip()
     def draw_board(self):
-        # Calculate the dimensions of the board
-        max_x = max(pos[0] for pos in self.positions.values())
-        min_x = min(pos[0] for pos in self.positions.values())
-        max_y = max(pos[1] for pos in self.positions.values())
-        min_y = min(pos[1] for pos in self.positions.values())
-
-        # Calculate the center of the board
-        center_x = (max_x + min_x) / 2
-        center_y = (max_y + min_y) / 2
-
-        # Calculate the offset to center the board
-        offset_x = 600 - center_x  # Half of the screen width is 600
-        offset_y = 600 - center_y  # Assuming a square display
-
         screen = pygame.display.set_mode((800, 600))
         screen.fill((255, 255, 255))
         for edge in self.board.edges():
-            # Adjust the positions based on the offset
-            adjusted_start = (self.positions[edge[0]][0] + offset_x, self.positions[edge[0]][1] + offset_y)
-            adjusted_end = (self.positions[edge[1]][0] + offset_x, self.positions[edge[1]][1] + offset_y)
             pygame.draw.line(screen, self.color_dict[self.board[edge[0]][edge[1]]['EdgeType']],
-                             adjusted_start, adjusted_end, 3)
+                             self.positions[edge[0]], self.positions[edge[1]], 3)
         for node in self.board.nodes():
-            # Adjust the positions based on the offset
-            adjusted_pos = (self.positions[node][0] + offset_x, self.positions[node][1] + offset_y)
-            pygame.draw.circle(screen, (0, 0, 0), adjusted_pos, 20)
+            node_type = self.board[node[0]][node[1]]['NodeType']
+            if node_type == 'shape':
+                if shape == '^':
+                    pygame.draw.polygon(screen,(0, 0, 0), self.positions[node], 20)
+                elif shape == 'o':
+                    pygame.draw.circle(screen, (0, 0, 0), self.positions[node], 20)
+                elif shape == 's':
+                    pygame.draw.rect(screen, (0, 0, 0), self.positions[node], 20)
+            else:
+                pygame.draw.circle(screen, (0, 0, 0), self.positions[node], 20)
         pygame.display.flip()
-
 
 class Play:
     def __init__(self):
