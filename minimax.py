@@ -12,9 +12,9 @@ Notes:
 * User goes first (so program can mathematically win)
 """
 
-import pygame
-from pygame.locals import *
-from pygame import gfxdraw
+import pygame_testing
+from pygame_testing.locals import *
+from pygame_testing import gfxdraw
 import sys
 from collections import namedtuple
 from time import sleep

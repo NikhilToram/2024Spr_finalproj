@@ -1,16 +1,11 @@
 import copy
-import random
-
 import networkx as nx
-import matplotlib.pyplot as plt
-#import pygame
-# Create the triangular lattice graph (3 rows, 5 columns)
-
+import pygame
 
 class Board:
     def __init__(self):
         self.style_dict = {'player1': 'solid', 'player2': 'solid', 'unplayed': 'dashed', 'unplayable': 'solid'}
-        self.color_dict = {'player1': 'red', 'player2': 'lightskyblue', 'unplayed': 'black', 'unplayable': 'white'}
+        self.color_dict = {'player1': (255, 0, 0), 'player2': (173, 216, 230), 'unplayed': (0, 0, 0), 'unplayable': (255, 255, 255)}
         self.dim = self.select_dimension()
         self.board, self.positions = self.create_base_board()
 
@@ -37,65 +32,24 @@ class Board:
             print(f' You have chosen an invalid input. '
                   f'Please enter the number corresponding to the size of game you want to play. \ni.e., 1, 2, or 3.')
             return self.select_dimension()
+
     def create_base_board(self):
         regular_lattice = nx.grid_2d_graph(self.dim[0], self.dim[1])
-        shapes = ['o', '^', 's']
-        if self.dim[0] == 4:
-            pattern = shapes[0]*2 + shapes[1]*3 + shapes[2]*4
-        elif self.dim[0] == 7:
-            pattern = shapes[0] * 7 + shapes[1] * 11 + shapes[2] * 18
-        else:
-            pattern = [shapes[0]]*16 + [shapes[1]]*25 + [shapes[2]]*40
-        #random.shuffle(pattern)
-        pattern = list(pattern)
-        random.shuffle(pattern)
-        pos = {(x, y): (y, -x) for x, y in regular_lattice.nodes()}
+        pos = {(x, y): (y * 100 + 50, x * 100 + 50) for x, y in regular_lattice.nodes()}
         nx.set_node_attributes(regular_lattice, 'game', name='NodeType')
         nx.set_node_attributes(regular_lattice, 'o', name='NodeShape')
         nx.set_edge_attributes(regular_lattice, 'unplayed', name='EdgeType')
         initial_nodes = list(copy.copy(regular_lattice.nodes()))
-        i = 0
-        circle = []
-        triangle = []
-        square = []
         for x, y in initial_nodes:
             if ((x, y+1) in initial_nodes) and \
                 ((x+1, y+1) in initial_nodes) and \
-                    ((x+1, y) in initial_nodes) and \
-                    i < len(pattern):
-                regular_lattice.add_node((x+0.5, y+0.5), NodeType='shape', NodeShape=list(pattern)[i])
-
-                print(pattern[i])
-                if pattern[i] == 'o':
-                    circle.append((x+0.5, y+0.5))
-                elif pattern[i] == '^':
-                    triangle.append((x+0.5, y+0.5))
-                else:
-                    square.append((x+0.5, y+0.5))
+                    ((x+1, y) in initial_nodes):
+                regular_lattice.add_node((x+0.5, y+0.5), NodeType='shape')
                 regular_lattice.add_edge((x+0.5, y+0.5), (x, y), EdgeType='unplayable')
                 regular_lattice.add_edge((x + 0.5, y + 0.5), (x, y+1), EdgeType='unplayable')
                 regular_lattice.add_edge((x + 0.5, y + 0.5), (x+1, y+1), EdgeType='unplayable')
                 regular_lattice.add_edge((x + 0.5, y + 0.5), (x+1, y), EdgeType='unplayable')
-                pos[(x+0.5, y+0.5)] = ((y+0.5), -(x+0.5))
-                i = i + 1
-        for node in regular_lattice.nodes():
-            print(f"for node {node} NodeType is: {regular_lattice.nodes[node]['NodeType']}")
-        for edge in regular_lattice.edges():
-            print(f"for edge connecting {edge} EdgeType is: {regular_lattice[edge[0]][edge[1]]['EdgeType']}")
-
-        EdgeType = nx.get_edge_attributes(regular_lattice, 'EdgeType').values()
-        NodeShape = list(nx.get_node_attributes(regular_lattice, 'NodeShape').values())
-        print(NodeShape)
-        nx.draw_networkx(regular_lattice, pos=pos, with_labels=True, node_color='darkgrey', node_size=250,
-                         edge_color=[self.color_dict[Edge] for Edge in EdgeType], nodelist = initial_nodes,
-                         node_shape= 'o',
-                         font_size=5, style=[self.style_dict[Edge] for Edge in EdgeType])
-        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=circle, node_shape='o', node_color='green')
-        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=triangle, node_shape='^', node_color='green')
-        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=square, node_shape='s', node_color='green')
-        plt.title("Regular 2d")
-        plt.figure(dpi=500)
-        plt.show()
+                pos[(x+0.5, y+0.5)] = ((y+0.5) * 100 + 50, (x+0.5) * 100 + 50)
         return regular_lattice, pos
 
     def draw_board(self):
@@ -127,15 +81,6 @@ class Board:
             pygame.draw.circle(screen, (0, 0, 0), adjusted_pos, 20)
         pygame.display.flip()
 
-    # def show_board(self):
-    #     EdgeType = nx.get_edge_attributes(self.board, 'EdgeType').values()
-    #     nx.draw_networkx(self.board, pos=self.positions, with_labels=True, node_color='darkgrey', node_size=250,
-    #                      edge_color=[self.color_dict[Edge] for Edge in EdgeType],
-    #                      font_size=5, style=[self.style_dict[Edge] for Edge in EdgeType])
-    #     plt.title("Regular 2d")
-    #     plt.figure(dpi=500)
-    #     plt.show()
-
 
 class Play:
     def __init__(self):
@@ -145,6 +90,10 @@ class Play:
         self.box_counts = {player: 0 for player in self.players}
         self.start = self.play()
 
+    def player_turn(self, move):
+        if self.box(move):
+            pass
+
     def ask_for_selection(self, player, legal_moves):
         i = 1
         print(f'The available moves are as follows:')
@@ -153,7 +102,7 @@ class Play:
             i = i + 1
 
         selection = int(input('Make a move. Enter the index of the move you want to play'))
-        return legal_moves[selection - 1]
+        return legal_moves[selection-1]
 
     def selection(self, player):
         still_legal_moves = self.board.legal_move_edges()
@@ -194,4 +143,3 @@ class Play:
 
 pygame.init()
 Game = Play()
-
