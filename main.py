@@ -1,3 +1,5 @@
+import copy
+
 import networkx as nx
 import matplotlib.pyplot as plt
 #import pygame
@@ -29,6 +31,23 @@ class Board:
     def create_base_board(self):
         regular_lattice = nx.grid_2d_graph(self.dim[0], self.dim[1])
         pos = {(x, y): (y, -x) for x, y in regular_lattice.nodes()}
+        nx.set_node_attributes(regular_lattice, 'game', name='NodeType')
+        nx.set_edge_attributes(regular_lattice, 'unplayed', name='EdgeType')
+        initial_nodes = list(copy.copy(regular_lattice.nodes()))
+        for x, y in initial_nodes:
+            if ((x, y+1) in initial_nodes) and \
+                ((x+1, y+1) in initial_nodes) and \
+                ((x+1, y) in initial_nodes):
+                regular_lattice.add_node((x+0.5, y+0.5), NodeType='shape')
+                regular_lattice.add_edge((x+0.5, y+0.5), (x, y), EdgeType='unplayable')
+                regular_lattice.add_edge((x + 0.5, y + 0.5), (x, y+1), EdgeType='unplayable')
+                regular_lattice.add_edge((x + 0.5, y + 0.5), (x+1, y+1), EdgeType='unplayable')
+                regular_lattice.add_edge((x + 0.5, y + 0.5), (x+1, y), EdgeType='unplayable')
+                pos[(x+0.5, y+0.5)] = ((y+0.5), -(x+0.5))
+        for node in regular_lattice.nodes():
+            print(f"for node {node} NodeType is: {regular_lattice.nodes[node]['NodeType']}")
+        for edge in regular_lattice.edges():
+            print(f"for edge connecting {edge} EdgeType is: {regular_lattice[edge[0]][edge[1]]['EdgeType']}")
         nx.draw(regular_lattice, pos=pos, with_labels=True, node_color='skyblue', node_size=250, font_size=12)
         plt.title("Regular 2d")
         plt.figure(dpi=500)
