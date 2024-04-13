@@ -14,7 +14,7 @@ def selection(board: nx.Graph, node1:int, node2: int, player) -> nx.Graph:
         print("This move is not legal. Please try again.")
         ask_for_selection()
     else:
-        already_played.append(tuple(sorted(node1, node2)))
+        still_legal_moves.remove(tuple(sorted(node1, node2)))
         edge_list = [(node1, node2)]
         all_node_positions = nx.get_node_attributes(board, 'pos')
         selected_node_pos = {node1: all_node_positions[node1],
