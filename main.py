@@ -12,12 +12,12 @@ class Board:
         self.color_dict = {'unplayed': 'black', 'unplayable': 'white'}
         self.dim = self.select_dimension()
         self.board, self.positions = self.create_base_board()
-        self.legal_moves = [tuple(sorted([edge[0], edge[1]])) for edge in nx.edges(self.board)]
+
 
     def select_dimension(self):
         option = input(f'Please select the number of the game size that you want to play. \n '
                        f'1. Small [4x4 game]\n '
-                       f'2. Meduim [7x7 game]\n '
+                       f'2. Medium [7x7 game]\n '
                        f'3. Large [10x10 game]\n'
                        f'Your selection: ')
         if int(option) == 1:
@@ -59,26 +59,46 @@ class Board:
         plt.show()
         return regular_lattice, pos
 
+class Play:
+    def __init__(self):
+        self.board = Board
+        self.legal_moves = [tuple(sorted([edge[0], edge[1]])) for edge in nx.edges(self.board)]
+        self.players = ['player1', 'player2']
+        self.current_player = self.players[0]
+        self.box_counts = {player: 0 for player in self.players}
+    def box(self, move):
+        node1, node2 = move[0], move[1]
+        without_shapes_board = self.board.copy()
+        try:
+           if nx.find_cycle(without_shapes_board, source= [node1,node2]):
+               return True
+        except nx.NetworkXNoCycle:
+            self.current_player = self.players[self.players[self.current_player].index+1]
+            print(self.current_player)
 
-def ask_for_selection():
-    node1, node2 = input('Make a move. Enter in the format: node1, node2')
-    return selection(node1, node2)
+    def player_turn(self, move):
+        if self.box(move):
+
+    def ask_for_selection(self, player):
+        node1, node2 = input('Make a move. Enter in the format: node1, node2')
+        return self.selection(node1, node2, player)
 
 
-def selection(board: nx.Graph, node1:int, node2: int, player) -> nx.Graph:
-    still_legal_moves = board.legal_moves
-    color = {'player1': 'red', 'player2': 'lightskyblue'}
-    if tuple(sorted(node1, node2)) not in still_legal_moves:
-        print("This move is not legal. Please try again.")
-        ask_for_selection()
-    else:
-        board.legal_moves.remove(tuple(sorted(node1, node2)))
-        edge_list = [(node1, node2)]
-        all_node_positions = nx.get_node_attributes(board, 'pos')
-        selected_node_pos = {node1: all_node_positions[node1],
-                             node2: all_node_positions[node2]}
-        nx.draw_networkx_edges(G=board, pos=selected_node_pos, edgelist=edge_list, edge_color=color[player])
-        return plt.show()
+    def selection(self, node1: int, node2: int, player) -> nx.Graph:
+        still_legal_moves = self.board.legal_moves
+        color = {'player1': 'red', 'player2': 'lightskyblue'}
+        if tuple(sorted(node1, node2)) not in still_legal_moves or \
+                self.board[node1][node2]["EdgeType"] != "unplayable" :
+            print("This move is not legal. Please try again.")
+            self.ask_for_selection(player)
+        else:
+            self.board.legal_moves.remove(tuple(sorted(node1, node2)))
+            edge_list = [(node1, node2)]
+            all_node_positions = nx.get_node_attributes(self.board, 'pos')
+            selected_node_pos = {node1: all_node_positions[node1],
+                                 node2: all_node_positions[node2]}
+            nx.draw_networkx_edges(G=self.board, pos=selected_node_pos, edgelist=edge_list, edge_color=color[player])
+            return plt.show()
 
 
 Game = Board()
