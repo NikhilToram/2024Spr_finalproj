@@ -12,7 +12,7 @@ class Board:
         self.style_dict = {'player1': 'solid', 'player2': 'solid', 'unplayed': 'dashed', 'unplayable': 'solid'}
         self.color_dict = {'player1': 'red', 'player2': 'lightskyblue', 'unplayed': 'black', 'unplayable': 'white'}
         self.dim = self.select_dimension()
-        self.board, self.positions = self.create_base_board()
+        self.board, self.positions, self.circle, self.triangle, self.square, self.initial_nodes = self.create_base_board()
 
     def legal_move_edges(self):
         legal_moves = []
@@ -96,7 +96,7 @@ class Board:
         plt.title("Regular 2d")
         plt.figure(dpi=500)
         plt.show()
-        return regular_lattice, pos
+        return regular_lattice, pos, circle, triangle, square, initial_nodes
 
     def draw_board(self):
         # Calculate the dimensions of the board
@@ -127,14 +127,27 @@ class Board:
             pygame.draw.circle(screen, (0, 0, 0), adjusted_pos, 20)
         pygame.display.flip()
 
-    # def show_board(self):
-    #     EdgeType = nx.get_edge_attributes(self.board, 'EdgeType').values()
-    #     nx.draw_networkx(self.board, pos=self.positions, with_labels=True, node_color='darkgrey', node_size=250,
-    #                      edge_color=[self.color_dict[Edge] for Edge in EdgeType],
-    #                      font_size=5, style=[self.style_dict[Edge] for Edge in EdgeType])
-    #     plt.title("Regular 2d")
-    #     plt.figure(dpi=500)
-    #     plt.show()
+    def show_board(self):
+        # EdgeType = nx.get_edge_attributes(self.board, 'EdgeType').values()
+        # nx.draw_networkx(self.board, pos=self.positions, with_labels=True, node_color='darkgrey', node_size=250,
+        #                  edge_color=[self.color_dict[Edge] for Edge in EdgeType],
+        #                  font_size=5, style=[self.style_dict[Edge] for Edge in EdgeType])
+        # plt.title("Regular 2d")
+        # plt.figure(dpi=500)
+        # plt.show()
+        EdgeType = nx.get_edge_attributes(self.board, 'EdgeType').values()
+        NodeShape = list(nx.get_node_attributes(self.board, 'NodeShape').values())
+        print(NodeShape)
+        nx.draw_networkx(self.board, pos=self.positions, with_labels=True, node_color='darkgrey', node_size=250,
+                         edge_color=[self.color_dict[Edge] for Edge in EdgeType], nodelist=self.initial_nodes,
+                         node_shape='o',
+                         font_size=5, style=[self.style_dict[Edge] for Edge in EdgeType])
+        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.circle, node_shape='o', node_color='green')
+        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.triangle, node_shape='^', node_color='green')
+        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.square, node_shape='s', node_color='green')
+        plt.title("Regular 2d")
+        plt.figure(dpi=500)
+        plt.show()
 
 
 class Play:
@@ -161,6 +174,8 @@ class Play:
         move = self.ask_for_selection(player, still_legal_moves)
         self.board.board[move[0]][move[1]]['EdgeType'] = player
         self.board.draw_board()
+        self.board.show_board()
+
         return self.box(move)
 
     def box(self, move):
@@ -179,6 +194,25 @@ class Play:
                 if completing_player:
                     self.box_counts[completing_player] += 1
         return self.box_counts
+
+    def neighbors_boxed(self, neighbors):
+        valid_connection_counter = 0
+        if self.board.board[neighbors[0]][neighbors[1]]['EdgeType'] in ['player1', 'player2']:
+            valid_connection_counter += 1
+        if self.board.board[neighbors[1]][neighbors[2]]['EdgeType'] in ['player1', 'player2']:
+            valid_connection_counter += 1
+        if self.board.board[neighbors[2]][neighbors[3]]['EdgeType'] in ['player1', 'player2']:
+            valid_connection_counter += 1
+        if self.board.board[neighbors[0]][neighbors[3]]['EdgeType'] in ['player1', 'player2']:
+            valid_connection_counter += 1
+        if self.board.board[neighbors[0]][neighbors[2]]['EdgeType'] in ['player1', 'player2']:
+            valid_connection_counter += 1
+        if self.board.board[neighbors[1]][neighbors[3]]['EdgeType'] in ['player1', 'player2']:
+            valid_connection_counter += 1
+        if valid_connection_counter =
+    def advanced_box(self):
+        for node in self.board.circle:
+            neighbours = nx.neighbors(self.board, node)
 
     def play(self):
         players = ['player1', 'player2']
