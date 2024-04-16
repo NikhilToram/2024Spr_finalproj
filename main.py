@@ -127,7 +127,7 @@ class Board:
             pygame.draw.circle(screen, (0, 0, 0), adjusted_pos, 20)
         pygame.display.flip()
 
-    def show_board(self):
+    def show_board(self, scores: dict):
         # EdgeType = nx.get_edge_attributes(self.board, 'EdgeType').values()
         # nx.draw_networkx(self.board, pos=self.positions, with_labels=True, node_color='darkgrey', node_size=250,
         #                  edge_color=[self.color_dict[Edge] for Edge in EdgeType],
@@ -145,7 +145,7 @@ class Board:
         nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.circle, node_shape='o', node_color='green')
         nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.triangle, node_shape='^', node_color='green')
         nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.square, node_shape='s', node_color='green')
-        plt.title("Regular 2d")
+        plt.title(f"Scores: Player 1 has {scores['player1']} points and Player 2 has {scores['player2']} points")
         plt.figure(dpi=500)
         plt.show()
 
@@ -153,6 +153,9 @@ class Board:
 class Play:
     def __init__(self):
         self.board = Board()
+        self.score_tracker = {}
+        self.player_scores = {'player1': {'circle': 0, 'triangle': 0, 'square': 0},
+                              'player2': {'circle': 0, 'triangle': 0, 'square': 0}}
         self.players = ['player1', 'player2']
         self.current_player = self.players[0]
         self.box_counts = {player: 0 for player in self.players}
@@ -173,58 +176,203 @@ class Play:
 
         move = self.ask_for_selection(player, still_legal_moves)
         self.board.board[move[0]][move[1]]['EdgeType'] = player
-        self.board.draw_board()
-        self.board.show_board()
+        #self.board.draw_board()
 
-        return self.box(move)
+        return self.advanced_box(player)
 
-    def box(self, move):
-        node1, node2 = move[0], move[1]
-        player_edges = [(u, v, d) for u, v, d in self.board.board.edges(data=True) if d['EdgeType'] in self.players]
-        only_played_board = nx.Graph(player_edges)
-        only_played_board.add_edge(node1, node2, EdgeType=self.current_player)  # Add the move to the board
-        closed_loops = nx.cycle_basis(only_played_board)  # Find all closed loops
-
-        for loop in closed_loops:
-            if len(loop) == 4:  # If the loop has 4 edges, it encloses a box
-                # Determine the player who completes the box
-                players_in_loop = set(
-                    only_played_board[u][v]['EdgeType'] for u, v in zip(loop, loop[1:] + [loop[0]]))
-                completing_player = next(iter(players_in_loop - {'unplayed', 'unplayable'}), None)
-                if completing_player:
-                    self.box_counts[completing_player] += 1
-        return self.box_counts
+    # def box(self, move):
+    #     node1, node2 = move[0], move[1]
+    #     player_edges = [(u, v, d) for u, v, d in self.board.board.edges(data=True) if d['EdgeType'] in self.players]
+    #     only_played_board = nx.Graph(player_edges)
+    #     only_played_board.add_edge(node1, node2, EdgeType=self.current_player)  # Add the move to the board
+    #     closed_loops = nx.cycle_basis(only_played_board)  # Find all closed loops
+    #
+    #     for loop in closed_loops:
+    #         if len(loop) == 4:  # If the loop has 4 edges, it encloses a box
+    #             # Determine the player who completes the box
+    #             players_in_loop = set(
+    #                 only_played_board[u][v]['EdgeType'] for u, v in zip(loop, loop[1:] + [loop[0]]))
+    #             completing_player = next(iter(players_in_loop - {'unplayed', 'unplayable'}), None)
+    #             if completing_player:
+    #                 self.box_counts[completing_player] += 1
+    #     return self.box_counts
 
     def neighbors_boxed(self, neighbors):
         valid_connection_counter = 0
-        if self.board.board[neighbors[0]][neighbors[1]]['EdgeType'] in ['player1', 'player2']:
-            valid_connection_counter += 1
-        if self.board.board[neighbors[1]][neighbors[2]]['EdgeType'] in ['player1', 'player2']:
-            valid_connection_counter += 1
-        if self.board.board[neighbors[2]][neighbors[3]]['EdgeType'] in ['player1', 'player2']:
-            valid_connection_counter += 1
-        if self.board.board[neighbors[0]][neighbors[3]]['EdgeType'] in ['player1', 'player2']:
-            valid_connection_counter += 1
-        if self.board.board[neighbors[0]][neighbors[2]]['EdgeType'] in ['player1', 'player2']:
-            valid_connection_counter += 1
-        if self.board.board[neighbors[1]][neighbors[3]]['EdgeType'] in ['player1', 'player2']:
-            valid_connection_counter += 1
-        if valid_connection_counter =
-    def advanced_box(self):
+        neighbors = list(neighbors)
+        print(neighbors)
+        try:
+            if self.board.board[neighbors[0]][neighbors[1]]['EdgeType'] in ['player1', 'player2']:
+                valid_connection_counter += 1
+        except KeyError:
+            pass
+        try:
+            if self.board.board[neighbors[1]][neighbors[2]]['EdgeType'] in ['player1', 'player2']:
+                valid_connection_counter += 1
+        except KeyError:
+            pass
+        try:
+            if self.board.board[neighbors[2]][neighbors[3]]['EdgeType'] in ['player1', 'player2']:
+                valid_connection_counter += 1
+        except KeyError:
+            pass
+        try:
+            if self.board.board[neighbors[0]][neighbors[3]]['EdgeType'] in ['player1', 'player2']:
+                valid_connection_counter += 1
+        except KeyError:
+            pass
+        try:
+            if self.board.board[neighbors[0]][neighbors[2]]['EdgeType'] in ['player1', 'player2']:
+                valid_connection_counter += 1
+        except KeyError:
+            pass
+        try:
+            if self.board.board[neighbors[1]][neighbors[3]]['EdgeType'] in ['player1', 'player2']:
+                valid_connection_counter += 1
+        except KeyError:
+            pass
+
+        if valid_connection_counter == 4:
+            return True
+        else:
+            return False
+
+    def advanced_box(self, player):
+        boxed = False
         for node in self.board.circle:
-            neighbours = nx.neighbors(self.board, node)
+            neighbours = nx.neighbors(self.board.board, node)
+            if node in self.score_tracker.keys():
+                pass
+            else:
+                if self.neighbors_boxed(neighbours):
+                    self.score_tracker[node] = 'circle'
+                    self.player_scores[player]['circle'] += 1
+                    boxed = True
+
+        for node in self.board.triangle:
+            neighbours = nx.neighbors(self.board.board, node)
+            if node in self.score_tracker.keys():
+                pass
+            else:
+                if self.neighbors_boxed(neighbours):
+                    self.score_tracker[node] = 'triangle'
+                    self.player_scores[player]['triangle'] += 1
+                    boxed = True
+
+        for node in self.board.square:
+            neighbours = nx.neighbors(self.board.board, node)
+            if node in self.score_tracker.keys():
+                pass
+            else:
+                if self.neighbors_boxed(neighbours):
+                    self.score_tracker[node] = 'square'
+                    self.player_scores[player]['square'] += 1
+                    boxed = True
+        return boxed
+
+    def redraw_map(self, nodes, player):
+        for node in nodes:
+            neighbors = list(nx.neighbors(self.board.board, node))
+            try:
+                self.board.board[neighbors[0]][neighbors[1]]['EdgeType'] = player
+            except KeyError:
+                pass
+            try:
+                self.board.board[neighbors[1]][neighbors[2]]['EdgeType'] = player
+            except KeyError:
+                pass
+            try:
+                self.board.board[neighbors[2]][neighbors[3]]['EdgeType'] = player
+            except KeyError:
+                pass
+            try:
+                self.board.board[neighbors[0]][neighbors[3]]['EdgeType'] = player
+            except KeyError:
+                pass
+            try:
+                self.board.board[neighbors[0]][neighbors[2]]['EdgeType'] = player
+            except KeyError:
+                pass
+            try:
+                self.board.board[neighbors[1]][neighbors[3]]['EdgeType'] = player
+            except KeyError:
+                pass
+
+    def capturing_shape(self, shape, player):
+        if shape == 'circle':
+            self.redraw_map(self.board.circle, player)
+            self.player_scores[self.players[int(not bool(self.players.index(player)))]]['circle'] = 0
+        if shape == 'triangle':
+            self.redraw_map(self.board.triangle, player)
+            self.player_scores[self.players[int(not bool(self.players.index(player)))]]['triangle'] = 0
+        if shape == 'square':
+            self.redraw_map(self.board.square, player)
+            self.player_scores[self.players[int(not bool(self.players.index(player)))]]['square'] = 0
+
+    def score(self, player):
+        total_circle = len(self.board.circle)
+        total_triangle = len(self.board.triangle)
+        total_square = len(self.board.square)
+        player_1_score = 0
+        player_2_score = 0
+        if self.player_scores['player1']['circle'] >= total_circle/2 and self.player_scores['player1']['circle'] != total_circle:
+            player_1_score += total_circle*5
+            self.player_scores['player1']['circle'] = total_circle
+            self.capturing_shape('circle', player)
+        else:
+            player_1_score += self.player_scores['player1']['circle'] * 5
+        if self.player_scores['player1']['triangle'] >= total_triangle/2 and self.player_scores['player1']['triangle'] != total_triangle:
+            player_1_score += total_triangle * 3
+            self.player_scores['player1']['triangle'] = total_triangle
+            self.capturing_shape('triangle', player)
+        else:
+            player_1_score += self.player_scores['player1']['triangle'] * 3
+        if self.player_scores['player1']['square'] >= total_square/2 and self.player_scores['player1']['square'] != total_square:
+            self.player_scores['player1']['square'] = total_square
+            self.capturing_shape('square', player)
+            player_1_score = total_square * 2
+        else:
+            player_1_score = self.player_scores['player1']['square'] * 2
+
+        if self.player_scores['player2']['circle'] >= total_circle / 2 and self.player_scores['player2']['circle'] != total_circle:
+            player_2_score += total_circle * 5
+            self.player_scores['player2']['circle'] = total_circle
+            self.capturing_shape('circle', player)
+        else:
+            player_2_score += self.player_scores['player2']['circle'] * 5
+
+        if self.player_scores['player2']['triangle'] >= total_triangle / 2 and self.player_scores['player2']['triangle'] != total_triangle:
+            player_2_score += total_triangle * 3
+            self.player_scores['player1']['triangle'] = total_triangle
+            self.capturing_shape('triangle', player)
+        else:
+            player_2_score += self.player_scores['player2']['triangle'] * 3
+
+        if self.player_scores['player2']['square'] >= total_square / 2 and self.player_scores['player2']['square'] != total_square:
+            player_2_score += total_square * 2
+            self.player_scores['player2']['square'] = total_square
+            self.capturing_shape('square', player)
+        else:
+            player_2_score += self.player_scores['player2']['square'] * 2
+
+        return {'player1': player_1_score,  'player2': player_2_score}
 
     def play(self):
         players = ['player1', 'player2']
         player = 0
-        while len(self.board.legal_move_edges())>0:
+        while len(self.board.legal_move_edges()) > 0:
             box_added = self.selection(players[player])
+            scores = self.score(players[player])
+            self.board.show_board(scores)
             if not box_added:
                 if player == 0:
                     player = 1
                 else:
                     player = 0
+            else:
+                print('You won a box!!!')
         return 0
+
 
 pygame.init()
 Game = Play()
