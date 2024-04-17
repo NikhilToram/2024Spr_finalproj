@@ -5,10 +5,12 @@ import random
 import matplotlib.pyplot as plt
 from pygame.locals import *
 
+
 class Board:
     def __init__(self):
         self.style_dict = {'player1': 'solid', 'player2': 'solid', 'unplayed': 'dashed', 'unplayable': 'solid'}
-        self.color_dict = {'player1': (255, 0, 0), 'player2': (173, 216, 230), 'unplayed': (0, 0, 0), 'unplayable': (255, 255, 255)}
+        self.color_dict = {'player1': 'red', 'player2': 'lightskyblue', 'unplayed': 'black', 'unplayable': 'white',
+                           'game': 'black','shape': 'green'}
         self.dim = self.select_dimension()
         self.board, self.positions, self.circle, self.triangle, self.square, self.initial_nodes = self.create_base_board()
 
@@ -35,7 +37,6 @@ class Board:
             print(f' You have chosen an invalid input. '
                   f'Please enter the number corresponding to the size of game you want to play. \ni.e., 1, 2, or 3.')
             return self.select_dimension()
-
 
     def create_base_board(self):
         regular_lattice = nx.grid_2d_graph(self.dim[0], self.dim[1])
@@ -98,54 +99,37 @@ class Board:
         plt.show()
         return regular_lattice, pos, circle, triangle, square, initial_nodes
 
-
-    # def draw_board(self):
-    #     # # Calculate the dimensions of the board
-    #     # max_x = max(pos[0] for pos in self.positions.values())
-    #     # min_x = min(pos[0] for pos in self.positions.values())
-    #     # max_y = max(pos[1] for pos in self.positions.values())
-    #     # min_y = min(pos[1] for pos in self.positions.values())
-    #     #
-    #     # # Calculate the center of the board
-    #     # center_x = (max_x + min_x) / 2
-    #     # center_y = (max_y + min_y) / 2
-    #     #
-    #     # # Calculate the offset to center the board
-    #     # offset_x = 600 - center_x  # Half of the screen width is 600
-    #     # offset_y = 600 - center_y  # Assuming a square display
-    #
-    #     screen = pygame.display.set_mode((800, 600),HWSURFACE|DOUBLEBUF|RESIZABLE)
-    #     # screen.blit(pygame.transform.scale())
-    #     screen.fill((255, 255, 255))
-    #     for edge in self.board.edges():
-    #         # Adjust the positions based on the offset
-    #         adjusted_start = (self.positions[edge[0]][0], self.positions[edge[0]][1])
-    #         adjusted_end = (self.positions[edge[1]][0], self.positions[edge[1]][1])
-    #         pygame.draw.line(screen, self.color_dict[self.board[edge[0]][edge[1]]['EdgeType']],
-    #                          adjusted_start, adjusted_end, 3)
-    #     for node in self.board.nodes():
-    #         # Adjust the positions based on the offset
-    #         adjusted_pos = (self.positions[node][0], self.positions[node][1])
-    #         pygame.draw.circle(screen, (0, 0, 0), adjusted_pos, 20)
-    #     pygame.display.flip()
     def draw_board(self):
-        screen = pygame.display.set_mode((800, 600))
+        screen = pygame.display.set_mode((800, 600), RESIZABLE)
         screen.fill((255, 255, 255))
         for edge in self.board.edges():
+            start_pos = (int(self.positions[edge[0]][0] * 50) + 400, int(self.positions[edge[0]][1] * 50) + 300)
+            end_pos = (int(self.positions[edge[1]][0] * 50) + 400, int(self.positions[edge[1]][1] * 50) + 300)
             pygame.draw.line(screen, self.color_dict[self.board[edge[0]][edge[1]]['EdgeType']],
-                             self.positions[edge[0]], self.positions[edge[1]], 3)
+                             start_pos, end_pos, 3)
         for node in self.board.nodes():
-            node_type = self.board[node[0]][node[1]]['NodeType']
+            print(self.board[node])
+            node_type = self.board.nodes[node]['NodeType']
+            node_shape = self.board.nodes[node]['NodeShape']
+            node_pos = (int(self.positions[node][0] * 50) + 400, int(self.positions[node][1] * 50) + 300)
             if node_type == 'shape':
-                if shape == '^':
-                    pygame.draw.polygon(screen,(0, 0, 0), self.positions[node], 20)
-                elif shape == 'o':
-                    pygame.draw.circle(screen, (0, 0, 0), self.positions[node], 20)
-                elif shape == 's':
-                    pygame.draw.rect(screen, (0, 0, 0), self.positions[node], 20)
+                if node_shape == '^':
+                    triangle_size = 10
+                    triangle_vertices = [(node_pos[0], node_pos[1] - triangle_size),
+                                         (node_pos[0] - triangle_size, node_pos[1] + triangle_size),
+                                         (node_pos[0] + triangle_size, node_pos[1] + triangle_size)]
+                    pygame.draw.polygon(screen, self.color_dict[self.board.nodes[node]['NodeType']], triangle_vertices)
+                elif node_shape == 'o':
+                    pygame.draw.circle(screen, self.color_dict[self.board.nodes[node]['NodeType']], node_pos, 10)
+                elif node_shape == 's':
+                    node_rect = pygame.Rect(node_pos[0] - 10, node_pos[1] - 10, 20, 20)
+                    pygame.draw.rect(screen, self.color_dict[self.board.nodes[node]['NodeType']], node_rect)
             else:
-                pygame.draw.circle(screen, (0, 0, 0), self.positions[node], 20)
+                pygame.draw.circle(screen, (0, 0, 0), node_pos, 10)
+
+            # pygame.draw.circle(screen, (0, 0, 0), node_pos, 10)
         pygame.display.flip()
+
 
 class Play:
     def __init__(self):
@@ -167,7 +151,7 @@ class Play:
             i = i + 1
 
         selection = int(input('Make a move. Enter the index of the move you want to play'))
-        return legal_moves[selection-1]
+        return legal_moves[selection - 1]
 
     def selection(self, player):
         still_legal_moves = self.board.legal_move_edges()
@@ -195,9 +179,11 @@ class Play:
         return self.box_counts
 
     def play(self):
+        pygame.init()
+
         players = ['player1', 'player2']
         player = 0
-        while len(self.board.legal_move_edges())>0:
+        while len(self.board.legal_move_edges()) > 0:
             box_added = self.selection(players[player])
             if not box_added:
                 if player == 0:
@@ -206,5 +192,5 @@ class Play:
                     player = 0
         return 0
 
-pygame.init()
+
 Game = Play()
