@@ -96,19 +96,26 @@ class Board:
         nx.draw_networkx_nodes(regular_lattice, pos, nodelist=square, node_shape='s', node_color='green')
         plt.title("Regular 2d")
         plt.figure(dpi=500)
-        plt.show()
+        # plt.show()
         return regular_lattice, pos, circle, triangle, square, initial_nodes
 
-    def draw_board(self):
+    def draw_board(self, selected_edge=None):
         screen = pygame.display.set_mode((800, 600), RESIZABLE)
         screen.fill((255, 255, 255))
+
+        buffer = pygame.Surface((800, 600))
+        buffer.fill((255, 255, 255))
+
+        # Draw lines and shapes to the off-screen buffer with colors corresponding to the player
         for edge in self.board.edges():
             start_pos = (int(self.positions[edge[0]][0] * 50) + 400, int(self.positions[edge[0]][1] * 50) + 300)
             end_pos = (int(self.positions[edge[1]][0] * 50) + 400, int(self.positions[edge[1]][1] * 50) + 300)
-            pygame.draw.line(screen, self.color_dict[self.board[edge[0]][edge[1]]['EdgeType']],
-                             start_pos, end_pos, 3)
+            color = self.color_dict[self.board[edge[0]][edge[1]]['EdgeType']]
+            if edge == selected_edge:  # Change color for selected edge
+                color = self.color_dict[self.current_player]
+            pygame.draw.line(buffer, color, start_pos, end_pos, 3)
+
         for node in self.board.nodes():
-            print(self.board[node])
             node_type = self.board.nodes[node]['NodeType']
             node_shape = self.board.nodes[node]['NodeShape']
             node_pos = (int(self.positions[node][0] * 50) + 400, int(self.positions[node][1] * 50) + 300)
@@ -118,17 +125,123 @@ class Board:
                     triangle_vertices = [(node_pos[0], node_pos[1] - triangle_size),
                                          (node_pos[0] - triangle_size, node_pos[1] + triangle_size),
                                          (node_pos[0] + triangle_size, node_pos[1] + triangle_size)]
-                    pygame.draw.polygon(screen, self.color_dict[self.board.nodes[node]['NodeType']], triangle_vertices)
+                    pygame.draw.polygon(buffer, self.color_dict[self.board.nodes[node]['NodeType']], triangle_vertices)
                 elif node_shape == 'o':
-                    pygame.draw.circle(screen, self.color_dict[self.board.nodes[node]['NodeType']], node_pos, 10)
+                    pygame.draw.circle(buffer, self.color_dict[self.board.nodes[node]['NodeType']], node_pos, 10)
                 elif node_shape == 's':
                     node_rect = pygame.Rect(node_pos[0] - 10, node_pos[1] - 10, 20, 20)
-                    pygame.draw.rect(screen, self.color_dict[self.board.nodes[node]['NodeType']], node_rect)
+                    pygame.draw.rect(buffer, self.color_dict[self.board.nodes[node]['NodeType']], node_rect)
             else:
-                pygame.draw.circle(screen, (0, 0, 0), node_pos, 10)
+                pygame.draw.circle(buffer, (0, 0, 0), node_pos, 5)
 
-            # pygame.draw.circle(screen, (0, 0, 0), node_pos, 10)
+        # Blit the off-screen buffer to the screen
+        screen.blit(buffer, (0, 0))
         pygame.display.flip()
+
+        # Wait for player input (mouse click)
+        while True:
+            for event in pygame.event.get():
+                print("Event received:", event)
+                if event.type == QUIT:
+                    pygame.quit()
+                    quit()
+                elif event.type == MOUSEBUTTONDOWN:
+                    if event.button == 1:  # Left mouse button clicked
+                        pos = pygame.mouse.get_pos()
+                        print(pos)
+                        selected_edge = self.get_selected_edge(pos)
+                        print(selected_edge)
+                        if selected_edge and selected_edge in self.board.legal_move_edges():
+                            self.board.board[selected_edge[0]][selected_edge[1]]['EdgeType'] = self.current_player
+                            self.box(selected_edge=selected_edge)
+                            return self.draw_board(selected_edge)  # Update the display after a valid mouse click
+
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    quit()
+                elif event.type == MOUSEBUTTONDOWN:
+                    if event.button == 1:  # Left mouse button clicked
+                        pos = pygame.mouse.get_pos()
+                        selected_edge = self.get_selected_edge(pos)
+                        if selected_edge and selected_edge in self.legal_move_edges():
+                            self.board.board[selected_edge[0]][selected_edge[1]]['EdgeType'] = self.current_player
+                            self.box(selected_edge)
+                            return self.draw_board(selected_edge)  # Update the display after a valid mouse click
+
+    # def draw_board(self, selected_edge=None):
+    #     screen = pygame.display.set_mode((800, 600), RESIZABLE)
+    #     screen.fill((255, 255, 255))
+    #
+    #     buffer = pygame.Surface((800, 600))
+    #     buffer.fill((255, 255, 255))
+    #
+    #     # Draw lines and shapes to the off-screen buffer
+    #     for edge in self.board.edges():
+    #         start_pos = (int(self.positions[edge[0]][0] * 50) + 400, int(self.positions[edge[0]][1] * 50) + 300)
+    #         end_pos = (int(self.positions[edge[1]][0] * 50) + 400, int(self.positions[edge[1]][1] * 50) + 300)
+    #         color = self.color_dict[self.board[edge[0]][edge[1]]['EdgeType']]
+    #         if edge == selected_edge:  # Change color for selected edge
+    #             color = self.color_dict[self.current_player]
+    #         pygame.draw.line(buffer, color, start_pos, end_pos, 3)
+    #
+    #     for node in self.board.nodes():
+    #         node_type = self.board.nodes[node]['NodeType']
+    #         node_shape = self.board.nodes[node]['NodeShape']
+    #         node_pos = (int(self.positions[node][0] * 50) + 400, int(self.positions[node][1] * 50) + 300)
+    #         if node_type == 'shape':
+    #             if node_shape == '^':
+    #                 triangle_size = 10
+    #                 triangle_vertices = [(node_pos[0], node_pos[1] - triangle_size),
+    #                                      (node_pos[0] - triangle_size, node_pos[1] + triangle_size),
+    #                                      (node_pos[0] + triangle_size, node_pos[1] + triangle_size)]
+    #                 pygame.draw.polygon(buffer, self.color_dict[self.board.nodes[node]['NodeType']], triangle_vertices)
+    #             elif node_shape == 'o':
+    #                 pygame.draw.circle(buffer, self.color_dict[self.board.nodes[node]['NodeType']], node_pos, 10)
+    #             elif node_shape == 's':
+    #                 node_rect = pygame.Rect(node_pos[0] - 10, node_pos[1] - 10, 20, 20)
+    #                 pygame.draw.rect(buffer, self.color_dict[self.board.nodes[node]['NodeType']], node_rect)
+    #         else:
+    #             pygame.draw.circle(buffer, (0, 0, 0), node_pos, 5)
+    #
+    #     # Blit the off-screen buffer to the screen
+    #     screen.blit(buffer, (0, 0))
+    #     pygame.display.flip()
+    #
+    #     # Wait for player input (mouse click)
+    #     while True:
+    #         for event in pygame.event.get():
+    #             if event.type == QUIT:
+    #                 pygame.quit()
+    #                 quit()
+    #             elif event.type == MOUSEBUTTONDOWN:
+    #                 if event.button == 1:  # Left mouse button clicked
+    #                     pos = pygame.mouse.get_pos()
+    #                     selected_edge = self.get_selected_edge(pos)
+    #                     if selected_edge and selected_edge in self.board.legal_move_edges():
+    #                         self.board.board[selected_edge[0]][selected_edge[1]]['EdgeType'] = self.current_player
+    #                         self.box(selected_edge=selected_edge)
+    #                         return self.draw_board()  # Update the display after a valid mouse click
+
+    def get_selected_edge(self, pos):
+        # Iterate over the edges and find the edge closest to the mouse click
+        print(self.board.edges())
+        min_distance = 1000
+        for edge in self.board.edges():
+            print(edge)
+            start_pos = self.positions[edge[0]]
+            end_pos = self.positions[edge[1]]
+            # Calculate the distance from the click position to the edge
+            distance = abs((end_pos[1] - start_pos[1]) * pos[0] - (end_pos[0] - start_pos[0]) * pos[1] +
+                           end_pos[0] * start_pos[1] - end_pos[1] * start_pos[0]) / \
+                       ((end_pos[1] - start_pos[1]) ** 2 + (end_pos[0] - start_pos[0]) ** 2) ** 0.5
+            # If the distance is within a certain threshold, consider it as a click on the edge
+            print(distance)
+            if distance < min_distance:  # You can adjust the threshold as needed
+                print(edge)
+                return edge
+            else:
+                return None
 
 
 class Play:
@@ -139,58 +252,55 @@ class Play:
         self.box_counts = {player: 0 for player in self.players}
         self.start = self.play()
 
-    def player_turn(self, move):
-        if self.box(move):
-            pass
-
-    def ask_for_selection(self, player, legal_moves):
-        i = 1
-        print(f'The available moves are as follows:')
-        for legal_move in legal_moves:
-            print(f'{i} Node {legal_move[0]} to {legal_move[1]}')
-            i = i + 1
-
-        selection = int(input('Make a move. Enter the index of the move you want to play'))
-        return legal_moves[selection - 1]
-
-    def selection(self, player):
-        still_legal_moves = self.board.legal_move_edges()
-
-        move = self.ask_for_selection(player, still_legal_moves)
-        self.board.board[move[0]][move[1]]['EdgeType'] = player
-        self.board.draw_board()
-        return self.box(move)
-
-    def box(self, move):
-        node1, node2 = move[0], move[1]
-        player_edges = [(u, v, d) for u, v, d in self.board.board.edges(data=True) if d['EdgeType'] in self.players]
-        only_played_board = nx.Graph(player_edges)
-        only_played_board.add_edge(node1, node2, EdgeType=self.current_player)  # Add the move to the board
-        closed_loops = nx.cycle_basis(only_played_board)  # Find all closed loops
-
-        for loop in closed_loops:
-            if len(loop) == 4:  # If the loop has 4 edges, it encloses a box
-                # Determine the player who completes the box
-                players_in_loop = set(
-                    only_played_board[u][v]['EdgeType'] for u, v in zip(loop, loop[1:] + [loop[0]]))
-                completing_player = next(iter(players_in_loop - {'unplayed', 'unplayable'}), None)
-                if completing_player:
-                    self.box_counts[completing_player] += 1
-        return self.box_counts
-
     def play(self):
         pygame.init()
+        selected_edge = None  # Variable to store the selected edge
 
-        players = ['player1', 'player2']
-        player = 0
-        while len(self.board.legal_move_edges()) > 0:
-            box_added = self.selection(players[player])
-            if not box_added:
-                if player == 0:
-                    player = 1
-                else:
-                    player = 0
-        return 0
+        running = True
+        while running:
+            # Event handling loop
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    quit()
+                elif event.type == MOUSEBUTTONDOWN:
+                    if event.button == 1:  # Left mouse button clicked
+                        pos = pygame.mouse.get_pos()
+                        selected_edge = self.selection(pos)  # Get the selected edge
+
+            # If an edge is selected
+            if selected_edge:
+                if selected_edge in self.board.legal_move_edges():
+                    self.board[selected_edge[0]][selected_edge[1]]['EdgeType'] = self.current_player
+                    self.board.draw_board(selected_edge)  # Update display with selected edge
+                    self.box(selected_edge)
+                    self.current_player = self.players[1] if self.current_player == self.players[0] else self.players[0]
+                    selected_edge = None  # Reset the selected edge for the next turn
+
+            # Update the display
+            self.board.draw_board()
+
+            # Check game over condition
+            if len(self.board.legal_move_edges()) == 0:
+                running = False
+
+    def selection(self, pos):
+        # Wait for player input (mouse click)
+        print("Mouse position:", pos)  # Print mouse position for debugging
+        for edge in self.board.board.edges():
+            start_pos = self.board.positions[edge[0]]
+            end_pos = self.board.positions[edge[1]]
+            if self.is_clicked(pos, start_pos, end_pos):
+                return edge
+        return None
+
+    def is_clicked(self, pos, start_pos, end_pos):
+        # Check if the position is within a certain distance from the edge
+        threshold = 10  # Adjust this value as needed
+        distance = abs((end_pos[1] - start_pos[1]) * pos[0] - (end_pos[0] - start_pos[0]) * pos[1] +
+                       end_pos[0] * start_pos[1] - end_pos[1] * start_pos[0]) / \
+                   ((end_pos[1] - start_pos[1]) ** 2 + (end_pos[0] - start_pos[0]) ** 2) ** 0.5
+        return distance < threshold
 
 
 Game = Play()
