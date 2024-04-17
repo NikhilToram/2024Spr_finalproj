@@ -12,40 +12,33 @@ class Board:
         self.style_dict = {'player1': 'solid', 'player2': 'solid', 'unplayed': 'dashed', 'unplayable': 'solid'}
         self.color_dict = {'player1': 'red', 'player2': 'lightskyblue', 'unplayed': 'black', 'unplayable': 'white'}
         self.dim = self.select_dimension()
-        self.board, self.positions, self.circle, self.triangle, self.square, self.initial_nodes = self.create_base_board()
+        self.edge_number_dict = {}
+        self.edge_number_dict_r = {}
+        self.board, self.positions, self.circle, self.triangle, self.square, self.initial_nodes, self.edge_numbers = self.create_base_board()
 
-    def legal_move_edges(self):
+    def legal_move_edges(self, default_board):
         legal_moves = []
-        for edge in nx.edges(self.board):
-            if self.board[edge[0]][edge[1]]['EdgeType'] == 'unplayed':
+        for edge in nx.edges(default_board if default_board else self.board):
+            if default_board[edge[0]][edge[1]]['EdgeType'] == 'unplayed':
                 legal_moves.append(edge)
         return legal_moves
 
     def select_dimension(self):
-        option = input(f'Please select the number of the game size that you want to play. \n '
-                       f'1. Small [4x4 game]\n '
-                       f'2. Medium [7x7 game]\n '
-                       f'3. Large [10x10 game]\n'
-                       f'Your selection: ')
-        if int(option) == 1:
-            return [4, 4]
-        elif int(option) == 2:
-            return [7, 7]
-        elif int(option) == 3:
-            return [10, 10]
-        else:
-            print(f' You have chosen an invalid input. '
+        option = (input(f'Please enter the integer (n) dimension of the (nxn) grid you want from 3 to 15.'))
+        try:
+            return [int(option)+1, int(option)+1]
+        except ValueError:
+            print(f'You have chosen an invalid input. '
                   f'Please enter the number corresponding to the size of game you want to play. \ni.e., 1, 2, or 3.')
             return self.select_dimension()
     def create_base_board(self):
         regular_lattice = nx.grid_2d_graph(self.dim[0], self.dim[1])
         shapes = ['o', '^', 's']
-        if self.dim[0] == 4:
-            pattern = shapes[0]*2 + shapes[1]*3 + shapes[2]*4
-        elif self.dim[0] == 7:
-            pattern = shapes[0] * 7 + shapes[1] * 11 + shapes[2] * 18
-        else:
-            pattern = [shapes[0]]*16 + [shapes[1]]*25 + [shapes[2]]*40
+        total_cells = self.dim[0]*self.dim[1]
+        circle_num = int(0.2*total_cells)
+        triangle_num = int(0.3*total_cells)
+        square_num = total_cells-circle_num-triangle_num
+        pattern = shapes[0]*(circle_num) + shapes[1]*(triangle_num) + shapes[2]*(square_num)
         #random.shuffle(pattern)
         pattern = list(pattern)
         random.shuffle(pattern)
@@ -79,23 +72,37 @@ class Board:
                 i = i + 1
         for node in regular_lattice.nodes():
             print(f"for node {node} NodeType is: {regular_lattice.nodes[node]['NodeType']}")
+        i = 0
+        self.edge_numbers = self.legal_move_edges(regular_lattice)
+        print(self.edge_numbers)
         for edge in regular_lattice.edges():
-            print(f"for edge connecting {edge} EdgeType is: {regular_lattice[edge[0]][edge[1]]['EdgeType']}")
+            if edge in self.edge_numbers:
+
+                nx.set_edge_attributes(regular_lattice, i, name='EdgeNumber')
+                self.edge_number_dict[edge] = i
+                self.edge_number_dict_r[i] = edge
+                i += 1
+                print(f"for edge connecting {edge}\n\tEdgeType is: {regular_lattice[edge[0]][edge[1]]['EdgeType']}"
+                      f"\n\tEdgeNumber is: {regular_lattice[edge[0]][edge[1]]['EdgeNumber']}")
+            else:
+                print(f"for edge connecting {edge}\n\tEdgeType is: {regular_lattice[edge[0]][edge[1]]['EdgeType']}")
 
         EdgeType = nx.get_edge_attributes(regular_lattice, 'EdgeType').values()
         NodeShape = list(nx.get_node_attributes(regular_lattice, 'NodeShape').values())
         #print(NodeShape)
-        nx.draw_networkx(regular_lattice, pos=pos, with_labels=True, node_color='darkgrey', node_size=250,
+        nx.draw_networkx(regular_lattice, pos=pos, with_labels=False, node_color='darkgrey', node_size=250,
                          edge_color=[self.color_dict[Edge] for Edge in EdgeType], nodelist = initial_nodes,
                          node_shape= 'o',
                          font_size=5, style=[self.style_dict[Edge] for Edge in EdgeType])
-        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=circle, node_shape='o', node_color='green')
-        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=triangle, node_shape='^', node_color='green')
-        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=square, node_shape='s', node_color='green')
+        nx.draw_networkx_edge_labels(regular_lattice, pos, edge_labels=self.edge_number_dict,
+                                     font_color='black', font_size=10, font_weight='bold', rotate=0)
+        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=circle, node_shape='o', label=False, node_color='green')
+        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=triangle, node_shape='^',label=False, node_color='green')
+        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=square, node_shape='s',label=False, node_color='green')
         plt.title("Regular 2d")
         plt.figure(dpi=500)
         plt.show()
-        return regular_lattice, pos, circle, triangle, square, initial_nodes
+        return regular_lattice, pos, circle, triangle, square, initial_nodes, self.edge_numbers
 
     # def draw_board(self):
     #     # Calculate the dimensions of the board
@@ -137,13 +144,15 @@ class Board:
         EdgeType = nx.get_edge_attributes(self.board, 'EdgeType').values()
         NodeShape = list(nx.get_node_attributes(self.board, 'NodeShape').values())
         #print(NodeShape)
-        nx.draw_networkx(self.board, pos=self.positions, with_labels=True, node_color='darkgrey', node_size=250,
-                         edge_color=[self.color_dict[Edge] for Edge in EdgeType], nodelist=self.initial_nodes,
-                         node_shape='o',
+        nx.draw_networkx(self.board, pos=self.positions, with_labels=False, node_color='darkgrey', node_size=250,
+                         edge_color=[self.color_dict[Edge] for Edge in EdgeType],
+                         nodelist=self.initial_nodes,node_shape='o',
                          font_size=5, style=[self.style_dict[Edge] for Edge in EdgeType])
-        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.circle, node_shape='o', node_color='green')
-        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.triangle, node_shape='^', node_color='green')
-        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.square, node_shape='s', node_color='green')
+        nx.draw_networkx_edge_labels(self.board, self.positions, edge_labels=self.edge_number_dict,
+                                     font_color='black', font_size=10, font_weight='bold', rotate=0)
+        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.circle, label=False, node_shape='o', node_color='green')
+        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.triangle, label=False, node_shape='^', node_color='green')
+        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.square, label=False, node_shape='s', node_color='green')
         plt.title(f"Scores: Player 1 (red) has {scores['player1']} points and Player 2(blue) has {scores['player2']} points\nCurrent player: {player}")
         plt.figure(dpi=500)
         plt.show()
@@ -161,17 +170,16 @@ class Play:
         self.start = self.play()
 
     def ask_for_selection(self, player, legal_moves):
-        i = 1
         print(f'The available moves are as follows:')
-        for legal_move in legal_moves:
-            print(f'{i} Node {legal_move[0]} to {legal_move[1]}')
-            i = i + 1
+        for edge in self.board.edge_number_dict.keys():
+            if edge in legal_moves:
+                print(f'{self.board.edge_number_dict[edge]}')
 
         selection = int(input('Make a move. Enter the index of the move you want to play: '))
-        return legal_moves[selection - 1]
+        return self.board.edge_number_dict_r[selection]
 
     def selection(self, player):
-        still_legal_moves = self.board.legal_move_edges()
+        still_legal_moves = self.board.legal_move_edges(self.board.board)
 
         move = self.ask_for_selection(player, still_legal_moves)
         self.board.board[move[0]][move[1]]['EdgeType'] = player
@@ -200,34 +208,40 @@ class Play:
         valid_connection_counter = 0
         neighbors = list(neighbors)
         print(neighbors)
+        # try:
+        #     if self.board.board[neighbors[0]][neighbors[1]]['EdgeType'] in ['player1', 'player2']:
+        #         valid_connection_counter += 1
+        # except KeyError:
+        #     pass
+        # try:
+        #     if self.board.board[neighbors[1]][neighbors[2]]['EdgeType'] in ['player1', 'player2']:
+        #         valid_connection_counter += 1
+        # except KeyError:
+        #     pass
+        # try:
+        #     if self.board.board[neighbors[2]][neighbors[3]]['EdgeType'] in ['player1', 'player2']:
+        #         valid_connection_counter += 1
+        # except KeyError:
+        #     pass
+        # try:
+        #     if self.board.board[neighbors[0]][neighbors[3]]['EdgeType'] in ['player1', 'player2']:
+        #         valid_connection_counter += 1
+        # except KeyError:
+        #     pass
+        # try:
+        #     if self.board.board[neighbors[0]][neighbors[2]]['EdgeType'] in ['player1', 'player2']:
+        #         valid_connection_counter += 1
+        # except KeyError:
+        #     pass
+        # try:
+        #     if self.board.board[neighbors[1]][neighbors[3]]['EdgeType'] in ['player1', 'player2']:
+        #         valid_connection_counter += 1
+        # except KeyError:
+        #     pass
         try:
-            if self.board.board[neighbors[0]][neighbors[1]]['EdgeType'] in ['player1', 'player2']:
-                valid_connection_counter += 1
-        except KeyError:
-            pass
-        try:
-            if self.board.board[neighbors[1]][neighbors[2]]['EdgeType'] in ['player1', 'player2']:
-                valid_connection_counter += 1
-        except KeyError:
-            pass
-        try:
-            if self.board.board[neighbors[2]][neighbors[3]]['EdgeType'] in ['player1', 'player2']:
-                valid_connection_counter += 1
-        except KeyError:
-            pass
-        try:
-            if self.board.board[neighbors[0]][neighbors[3]]['EdgeType'] in ['player1', 'player2']:
-                valid_connection_counter += 1
-        except KeyError:
-            pass
-        try:
-            if self.board.board[neighbors[0]][neighbors[2]]['EdgeType'] in ['player1', 'player2']:
-                valid_connection_counter += 1
-        except KeyError:
-            pass
-        try:
-            if self.board.board[neighbors[1]][neighbors[3]]['EdgeType'] in ['player1', 'player2']:
-                valid_connection_counter += 1
+            for pair in [(0, 1), (1, 2), (2, 3), (0, 3), (0, 2), (1, 3)]:
+                if self.board.board[neighbors[pair[0]]][neighbors[pair[1]]]['EdgeType'] in ['player1', 'player2']:
+                    valid_connection_counter += 1
         except KeyError:
             pass
 
@@ -238,35 +252,46 @@ class Play:
 
     def advanced_box(self, player):
         boxed = False
-        for node in self.board.circle:
-            neighbours = nx.neighbors(self.board.board, node)
-            if node in self.score_tracker.keys():
-                pass
-            else:
-                if self.neighbors_boxed(neighbours):
-                    self.score_tracker[node] = 'circle'
-                    self.player_scores[player]['circle'] += 1
-                    boxed = True
-
-        for node in self.board.triangle:
-            neighbours = nx.neighbors(self.board.board, node)
-            if node in self.score_tracker.keys():
-                pass
-            else:
-                if self.neighbors_boxed(neighbours):
-                    self.score_tracker[node] = 'triangle'
-                    self.player_scores[player]['triangle'] += 1
-                    boxed = True
-
-        for node in self.board.square:
-            neighbours = nx.neighbors(self.board.board, node)
-            if node in self.score_tracker.keys():
-                pass
-            else:
-                if self.neighbors_boxed(neighbours):
-                    self.score_tracker[node] = 'square'
-                    self.player_scores[player]['square'] += 1
-                    boxed = True
+        # for node in self.board.circle:
+        #     neighbours = nx.neighbors(self.board.board, node)
+        #     if node in self.score_tracker.keys():
+        #         pass
+        #     else:
+        #         if self.neighbors_boxed(neighbours):
+        #             self.score_tracker[node] = 'circle'
+        #             self.player_scores[player]['circle'] += 1
+        #             boxed = True
+        #
+        # for node in self.board.triangle:
+        #     neighbours = nx.neighbors(self.board.board, node)
+        #     if node in self.score_tracker.keys():
+        #         pass
+        #     else:
+        #         if self.neighbors_boxed(neighbours):
+        #             self.score_tracker[node] = 'triangle'
+        #             self.player_scores[player]['triangle'] += 1
+        #             boxed = True
+        #
+        # for node in self.board.square:
+        #     neighbours = nx.neighbors(self.board.board, node)
+        #     if node in self.score_tracker.keys():
+        #         pass
+        #     else:
+        #         if self.neighbors_boxed(neighbours):
+        #             self.score_tracker[node] = 'square'
+        #             self.player_scores[player]['square'] += 1
+        #             boxed = True
+        shape_functions = {'triangle':self.board.triangle, 'square':self.board.square, 'circle':self.board.circle}
+        for shape in shape_functions.keys():
+            for node in shape_functions[shape]:
+                neighbours = nx.neighbors(self.board.board, node)
+                if node in self.score_tracker.keys():
+                    pass
+                else:
+                    if self.neighbors_boxed(neighbours):
+                        self.score_tracker[node] = shape
+                        self.player_scores[player][shape] += 1
+                        boxed = True
         return boxed
 
     def redraw_map(self, nodes, player, shape):
@@ -369,7 +394,7 @@ class Play:
         players = ['player1', 'player2']
         player = 0
 
-        while len(self.board.legal_move_edges()) > 0:
+        while len(self.board.legal_move_edges(self.board.board)) > 0:
             box_added = self.selection(players[player])
             unstable = True
             while unstable:
@@ -386,5 +411,33 @@ class Play:
             self.board.show_board(scores, players[player])
         return 0
 
-
 Play()
+class AI_player:
+    def __init__(self):
+        self.game = Play()
+        self.score = self.game.player_scores
+
+        self.depth = self.game.board.dim * 4
+
+    def difficulty(self):
+        diff = input("Type Easy (0), Medium (1), or Hard (2) for computer skill level:")
+        try:
+            diff = int(diff)
+        except TypeError:
+            diff = diff.lower()
+
+        if diff == 'easy' or diff == 0:
+            self.depth = 3
+        elif diff == 'medium' or diff == 1:
+            self.depth = 4
+        elif diff == 'hard' or diff == 2:
+            self.depth = 5
+
+        return self.depth
+    def min(self):
+
+    def hueristic(self):
+
+
+
+

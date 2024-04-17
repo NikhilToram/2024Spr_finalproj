@@ -109,31 +109,38 @@ class Board:
 
         # Draw lines and shapes to the off-screen buffer with colors corresponding to the player
         for edge in self.board.edges():
-            start_pos = (int(self.positions[edge[0]][0] * 50) + 400, int(self.positions[edge[0]][1] * 50) + 300)
-            end_pos = (int(self.positions[edge[1]][0] * 50) + 400, int(self.positions[edge[1]][1] * 50) + 300)
-            color = self.color_dict[self.board[edge[0]][edge[1]]['EdgeType']]
-            if edge == selected_edge:  # Change color for selected edge
-                color = self.color_dict[self.current_player]
-            pygame.draw.line(buffer, color, start_pos, end_pos, 3)
+            if ((self.positions[edge[0]][0] * 50) + 400) < 20400:
+                start_pos = (int(self.positions[edge[0]][0] * 50) + 400, int(self.positions[edge[0]][1] * 50) + 300)
+                print(start_pos)
+                end_pos = (int(self.positions[edge[1]][0] * 50) + 400, int(self.positions[edge[1]][1] * 50) + 300)
+                color = self.color_dict[self.board[edge[0]][edge[1]]['EdgeType']]
+                if edge == selected_edge:  # Change color for selected edge
+                    color = self.color_dict[self.current_player]
+                pygame.draw.line(buffer, color, start_pos, end_pos, 3)
+                print(edge)
+                self.positions[edge] = (start_pos, end_pos)
 
         for node in self.board.nodes():
             node_type = self.board.nodes[node]['NodeType']
             node_shape = self.board.nodes[node]['NodeShape']
             node_pos = (int(self.positions[node][0] * 50) + 400, int(self.positions[node][1] * 50) + 300)
-            if node_type == 'shape':
-                if node_shape == '^':
-                    triangle_size = 10
-                    triangle_vertices = [(node_pos[0], node_pos[1] - triangle_size),
-                                         (node_pos[0] - triangle_size, node_pos[1] + triangle_size),
-                                         (node_pos[0] + triangle_size, node_pos[1] + triangle_size)]
-                    pygame.draw.polygon(buffer, self.color_dict[self.board.nodes[node]['NodeType']], triangle_vertices)
-                elif node_shape == 'o':
-                    pygame.draw.circle(buffer, self.color_dict[self.board.nodes[node]['NodeType']], node_pos, 10)
-                elif node_shape == 's':
-                    node_rect = pygame.Rect(node_pos[0] - 10, node_pos[1] - 10, 20, 20)
-                    pygame.draw.rect(buffer, self.color_dict[self.board.nodes[node]['NodeType']], node_rect)
-            else:
-                pygame.draw.circle(buffer, (0, 0, 0), node_pos, 5)
+            print(node, node_pos)
+            if node_pos[0] < 20400:
+                if node_type == 'shape':
+                    if node_shape == '^':
+                        triangle_size = 10
+                        triangle_vertices = [(node_pos[0], node_pos[1] - triangle_size),
+                                             (node_pos[0] - triangle_size, node_pos[1] + triangle_size),
+                                             (node_pos[0] + triangle_size, node_pos[1] + triangle_size)]
+                        pygame.draw.polygon(buffer, self.color_dict[self.board.nodes[node]['NodeType']], triangle_vertices)
+                    elif node_shape == 'o':
+                        pygame.draw.circle(buffer, self.color_dict[self.board.nodes[node]['NodeType']], node_pos, 10)
+                    elif node_shape == 's':
+                        node_rect = pygame.Rect(node_pos[0] - 10, node_pos[1] - 10, 20, 20)
+                        pygame.draw.rect(buffer, self.color_dict[self.board.nodes[node]['NodeType']], node_rect)
+                else:
+                    pygame.draw.circle(buffer, (0, 0, 0), node_pos, 5)
+                self.positions[node] = node_pos
 
         # Blit the off-screen buffer to the screen
         screen.blit(buffer, (0, 0))
@@ -209,23 +216,25 @@ class Board:
     def get_selected_edge(self, pos):
         # Iterate over the edges and find the edge closest to the mouse click
         print(self.board.edges())
-        min_distance = 10
+        print(pos)
+        min_distance = 1000
         for edge in self.board.edges():
-            print(edge)
-            start_pos = self.positions[edge[0]]
-            end_pos = self.positions[edge[1]]
-            # Calculate the distance from the click position to the edge
-            distance = abs((end_pos[1] - start_pos[1]) * pos[0] - (end_pos[0] - start_pos[0]) * pos[1] +
-                           end_pos[0] * start_pos[1] - end_pos[1] * start_pos[0]) / \
-                       ((end_pos[1] - start_pos[1]) ** 2 + (end_pos[0] - start_pos[0]) ** 2) ** 0.5
-            # If the distance is within a certain threshold, consider it as a click on the edge
-            print(distance)
-            if distance < min_distance:
-                min_distance = distance
-                closest_edge = edge
-                print(closest_edge)
-            else:
-                pass
+            if self.board[edge[0]][edge[1]]['EdgeType'] == 'unplayed':
+                print(edge, self.positions[edge[0]])
+                start_pos = self.positions[edge[0]]
+                end_pos = self.positions[edge[1]]
+                # Calculate the distance from the click position to the edge
+                distance = abs((end_pos[1] - start_pos[1]) * pos[0] - (end_pos[0] - start_pos[0]) * pos[1] +
+                               end_pos[0] * start_pos[1] - end_pos[1] * start_pos[0]) / \
+                           ((end_pos[1] - start_pos[1]) ** 2 + (end_pos[0] - start_pos[0]) ** 2) ** 0.5
+                # If the distance is within a certain threshold, consider it as a click on the edge
+                print(distance)
+                if distance < min_distance:
+                    min_distance = distance
+                    closest_edge = edge
+                    print(closest_edge)
+                else:
+                    pass
         return closest_edge
 
 
