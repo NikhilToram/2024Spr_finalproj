@@ -299,40 +299,44 @@ class Play:
             self.score_tracker[node] = shape
             neighbors = list(nx.neighbors(self.board.board, node))
             try:
-                self.board.board[neighbors[0]][neighbors[1]]['EdgeType'] = player
+                for pair in [(0, 1), (1, 2), (2, 3), (0, 3), (0, 2), (1, 3)]:
+                    self.board.board[neighbors[pair[0]]][neighbors[pair[1]]]['EdgeType'] = player
             except KeyError:
                 pass
-            try:
-                self.board.board[neighbors[1]][neighbors[2]]['EdgeType'] = player
-            except KeyError:
-                pass
-            try:
-                self.board.board[neighbors[2]][neighbors[3]]['EdgeType'] = player
-            except KeyError:
-                pass
-            try:
-                self.board.board[neighbors[0]][neighbors[3]]['EdgeType'] = player
-            except KeyError:
-                pass
-            try:
-                self.board.board[neighbors[0]][neighbors[2]]['EdgeType'] = player
-            except KeyError:
-                pass
-            try:
-                self.board.board[neighbors[1]][neighbors[3]]['EdgeType'] = player
-            except KeyError:
-                pass
+            # try:
+            #     self.board.board[neighbors[1]][neighbors[2]]['EdgeType'] = player
+            # except KeyError:
+            #     pass
+            # try:
+            #     self.board.board[neighbors[2]][neighbors[3]]['EdgeType'] = player
+            # except KeyError:
+            #     pass
+            # try:
+            #     self.board.board[neighbors[0]][neighbors[3]]['EdgeType'] = player
+            # except KeyError:
+            #     pass
+            # try:
+            #     self.board.board[neighbors[0]][neighbors[2]]['EdgeType'] = player
+            # except KeyError:
+            #     pass
+            # try:
+            #     self.board.board[neighbors[1]][neighbors[3]]['EdgeType'] = player
+            # except KeyError:
+            #     pass
 
     def capturing_shape(self, shape, player):
-        if shape == 'circle':
-            self.redraw_map(self.board.circle, player, shape)
-            self.player_scores[self.players[int(not bool(self.players.index(player)))]]['circle'] = 0
-        if shape == 'triangle':
-            self.redraw_map(self.board.triangle, player, shape)
-            self.player_scores[self.players[int(not bool(self.players.index(player)))]]['triangle'] = 0
-        if shape == 'square':
-            self.redraw_map(self.board.square, player, shape)
-            self.player_scores[self.players[int(not bool(self.players.index(player)))]]['square'] = 0
+        shape_functions = {'triangle':self.board.triangle, 'square':self.board.square, 'circle':self.board.circle}
+        self.redraw_map(shape_functions[shape], player, shape)
+        self.player_scores[self.players[int(not bool(self.players.index(player)))]][shape] = 0
+        # if shape == 'circle':
+        #     self.redraw_map(self.board.circle, player, shape)
+        #     self.player_scores[self.players[int(not bool(self.players.index(player)))]]['circle'] = 0
+        # if shape == 'triangle':
+        #     self.redraw_map(self.board.triangle, player, shape)
+        #     self.player_scores[self.players[int(not bool(self.players.index(player)))]]['triangle'] = 0
+        # if shape == 'square':
+        #     self.redraw_map(self.board.square, player, shape)
+        #     self.player_scores[self.players[int(not bool(self.players.index(player)))]]['square'] = 0
         print(f'{player} captured {shape}')
 
     def score(self, player):
@@ -417,7 +421,7 @@ class AI_player:
         self.game = Play()
         self.score = self.game.player_scores
 
-        self.depth = self.game.board.dim * 4
+        self.depth = self.difficulty()
 
     def difficulty(self):
         diff = input("Type Easy (0), Medium (1), or Hard (2) for computer skill level:")
@@ -425,18 +429,21 @@ class AI_player:
             diff = int(diff)
         except TypeError:
             diff = diff.lower()
+        try:
+            if diff == 'easy' or diff == 0:
+                depth = 3
+            elif diff == 'medium' or diff == 1:
+                depth = 4
+            elif diff == 'hard' or diff == 2:
+                depth = 5
+            return depth
+        except ValueError:
+            return self.difficulty()
 
-        if diff == 'easy' or diff == 0:
-            self.depth = 3
-        elif diff == 'medium' or diff == 1:
-            self.depth = 4
-        elif diff == 'hard' or diff == 2:
-            self.depth = 5
+    def alpha_beta(self):
 
-        return self.depth
-    def min(self):
-
-    def hueristic(self):
+    def heuristic(self):
+        return (-1*self.score['player1'])+self.score['player2']
 
 
 
