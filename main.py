@@ -441,6 +441,20 @@ class AI_player:
             return self.difficulty()
 
     def alpha_beta(self):
+        return self.depth
+
+    def MiniMax(self, board: Board, depth_play, moves: list):
+        # find the minimum of the scores
+        # find the maximum
+        player = 'player2'
+        maximum = -20000
+        for move in moves:
+            move_heuristic = self.heuristic(player, move)
+            if move_heuristic> maximum:
+                maximum = move_heuristic
+
+
+    def min(self):
 
     def heuristic(self):
         return (-1*self.score['player1'])+self.score['player2']
