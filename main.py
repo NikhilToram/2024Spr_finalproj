@@ -64,8 +64,7 @@ class Board:
                     ((x+1, y) in initial_nodes) and \
                     i < len(pattern):
                 regular_lattice.add_node((x+0.5, y+0.5), NodeType='shape', NodeShape=list(pattern)[i])
-
-                print(pattern[i])
+                #print(pattern[i])
                 if pattern[i] == 'o':
                     circle.append((x+0.5, y+0.5))
                 elif pattern[i] == '^':
@@ -85,7 +84,7 @@ class Board:
 
         EdgeType = nx.get_edge_attributes(regular_lattice, 'EdgeType').values()
         NodeShape = list(nx.get_node_attributes(regular_lattice, 'NodeShape').values())
-        print(NodeShape)
+        #print(NodeShape)
         nx.draw_networkx(regular_lattice, pos=pos, with_labels=True, node_color='darkgrey', node_size=250,
                          edge_color=[self.color_dict[Edge] for Edge in EdgeType], nodelist = initial_nodes,
                          node_shape= 'o',
@@ -127,7 +126,7 @@ class Board:
     #         pygame.draw.circle(screen, (0, 0, 0), adjusted_pos, 20)
     #     pygame.display.flip()
 
-    def show_board(self, scores: dict):
+    def show_board(self, scores: dict, player):
         # EdgeType = nx.get_edge_attributes(self.board, 'EdgeType').values()
         # nx.draw_networkx(self.board, pos=self.positions, with_labels=True, node_color='darkgrey', node_size=250,
         #                  edge_color=[self.color_dict[Edge] for Edge in EdgeType],
@@ -137,7 +136,7 @@ class Board:
         # plt.show()
         EdgeType = nx.get_edge_attributes(self.board, 'EdgeType').values()
         NodeShape = list(nx.get_node_attributes(self.board, 'NodeShape').values())
-        print(NodeShape)
+        #print(NodeShape)
         nx.draw_networkx(self.board, pos=self.positions, with_labels=True, node_color='darkgrey', node_size=250,
                          edge_color=[self.color_dict[Edge] for Edge in EdgeType], nodelist=self.initial_nodes,
                          node_shape='o',
@@ -145,7 +144,7 @@ class Board:
         nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.circle, node_shape='o', node_color='green')
         nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.triangle, node_shape='^', node_color='green')
         nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.square, node_shape='s', node_color='green')
-        plt.title(f"Scores: Player 1 has {scores['player1']} points and Player 2 has {scores['player2']} points")
+        plt.title(f"Scores: Player 1 (red) has {scores['player1']} points and Player 2(blue) has {scores['player2']} points\nCurrent player: {player}")
         plt.figure(dpi=500)
         plt.show()
 
@@ -168,7 +167,7 @@ class Play:
             print(f'{i} Node {legal_move[0]} to {legal_move[1]}')
             i = i + 1
 
-        selection = int(input('Make a move. Enter the index of the move you want to play'))
+        selection = int(input('Make a move. Enter the index of the move you want to play: '))
         return legal_moves[selection - 1]
 
     def selection(self, player):
@@ -270,8 +269,9 @@ class Play:
                     boxed = True
         return boxed
 
-    def redraw_map(self, nodes, player):
+    def redraw_map(self, nodes, player, shape):
         for node in nodes:
+            self.score_tracker[node] = shape
             neighbors = list(nx.neighbors(self.board.board, node))
             try:
                 self.board.board[neighbors[0]][neighbors[1]]['EdgeType'] = player
@@ -300,14 +300,15 @@ class Play:
 
     def capturing_shape(self, shape, player):
         if shape == 'circle':
-            self.redraw_map(self.board.circle, player)
+            self.redraw_map(self.board.circle, player, shape)
             self.player_scores[self.players[int(not bool(self.players.index(player)))]]['circle'] = 0
         if shape == 'triangle':
-            self.redraw_map(self.board.triangle, player)
+            self.redraw_map(self.board.triangle, player, shape)
             self.player_scores[self.players[int(not bool(self.players.index(player)))]]['triangle'] = 0
         if shape == 'square':
-            self.redraw_map(self.board.square, player)
+            self.redraw_map(self.board.square, player, shape)
             self.player_scores[self.players[int(not bool(self.players.index(player)))]]['square'] = 0
+        print(f'{player} captured {shape}')
 
     def score(self, player):
         total_circle = len(self.board.circle)
@@ -315,36 +316,42 @@ class Play:
         total_square = len(self.board.square)
         player_1_score = 0
         player_2_score = 0
+        captured = False
         if self.player_scores['player1']['circle'] >= total_circle/2 and self.player_scores['player1']['circle'] != total_circle:
             player_1_score += total_circle*5
             self.player_scores['player1']['circle'] = total_circle
             self.capturing_shape('circle', player)
+            captured = True
         else:
             player_1_score += self.player_scores['player1']['circle'] * 5
         if self.player_scores['player1']['triangle'] >= total_triangle/2 and self.player_scores['player1']['triangle'] != total_triangle:
             player_1_score += total_triangle * 3
             self.player_scores['player1']['triangle'] = total_triangle
             self.capturing_shape('triangle', player)
+            captured = True
         else:
             player_1_score += self.player_scores['player1']['triangle'] * 3
         if self.player_scores['player1']['square'] >= total_square/2 and self.player_scores['player1']['square'] != total_square:
             self.player_scores['player1']['square'] = total_square
             self.capturing_shape('square', player)
-            player_1_score = total_square * 2
+            captured = True
+            player_1_score += total_square * 2
         else:
-            player_1_score = self.player_scores['player1']['square'] * 2
+            player_1_score += self.player_scores['player1']['square'] * 2
 
         if self.player_scores['player2']['circle'] >= total_circle / 2 and self.player_scores['player2']['circle'] != total_circle:
             player_2_score += total_circle * 5
             self.player_scores['player2']['circle'] = total_circle
             self.capturing_shape('circle', player)
+            captured = True
         else:
             player_2_score += self.player_scores['player2']['circle'] * 5
 
         if self.player_scores['player2']['triangle'] >= total_triangle / 2 and self.player_scores['player2']['triangle'] != total_triangle:
             player_2_score += total_triangle * 3
-            self.player_scores['player1']['triangle'] = total_triangle
+            self.player_scores['player2']['triangle'] = total_triangle
             self.capturing_shape('triangle', player)
+            captured = True
         else:
             player_2_score += self.player_scores['player2']['triangle'] * 3
 
@@ -352,18 +359,23 @@ class Play:
             player_2_score += total_square * 2
             self.player_scores['player2']['square'] = total_square
             self.capturing_shape('square', player)
+            captured = True
         else:
             player_2_score += self.player_scores['player2']['square'] * 2
-
-        return {'player1': player_1_score,  'player2': player_2_score}
+        print(f"player1: {player_1_score},  player2: {player_2_score}")
+        return {'player1': player_1_score,  'player2': player_2_score}, captured
 
     def play(self):
         players = ['player1', 'player2']
         player = 0
+
         while len(self.board.legal_move_edges()) > 0:
             box_added = self.selection(players[player])
-            scores = self.score(players[player])
-            self.board.show_board(scores)
+            unstable = True
+            while unstable:
+                scores, unstable = self.score(players[player])
+                print(self.player_scores)
+
             if not box_added:
                 if player == 0:
                     player = 1
@@ -371,6 +383,7 @@ class Play:
                     player = 0
             else:
                 print('You won a box!!!')
+            self.board.show_board(scores, players[player])
         return 0
 
 
