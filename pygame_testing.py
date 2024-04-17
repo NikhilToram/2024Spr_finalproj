@@ -13,6 +13,7 @@ class Board:
                            'game': 'black','shape': 'green'}
         self.dim = self.select_dimension()
         self.board, self.positions, self.circle, self.triangle, self.square, self.initial_nodes = self.create_base_board()
+        self.current_player = 'player1'
 
     def legal_move_edges(self):
         legal_moves = []
@@ -137,37 +138,19 @@ class Board:
         # Blit the off-screen buffer to the screen
         screen.blit(buffer, (0, 0))
         pygame.display.flip()
-
-        # Wait for player input (mouse click)
-        while True:
-            for event in pygame.event.get():
-                print("Event received:", event)
-                if event.type == QUIT:
-                    pygame.quit()
-                    quit()
-                elif event.type == MOUSEBUTTONDOWN:
-                    if event.button == 1:  # Left mouse button clicked
-                        pos = pygame.mouse.get_pos()
-                        print(pos)
-                        selected_edge = self.get_selected_edge(pos)
-                        print(selected_edge)
-                        if selected_edge and selected_edge in self.board.legal_move_edges():
-                            self.board.board[selected_edge[0]][selected_edge[1]]['EdgeType'] = self.current_player
-                            self.box(selected_edge=selected_edge)
-                            return self.draw_board(selected_edge)  # Update the display after a valid mouse click
-
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                    quit()
-                elif event.type == MOUSEBUTTONDOWN:
-                    if event.button == 1:  # Left mouse button clicked
-                        pos = pygame.mouse.get_pos()
-                        selected_edge = self.get_selected_edge(pos)
-                        if selected_edge and selected_edge in self.legal_move_edges():
-                            self.board.board[selected_edge[0]][selected_edge[1]]['EdgeType'] = self.current_player
-                            self.box(selected_edge)
-                            return self.draw_board(selected_edge)  # Update the display after a valid mouse click
+        #
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                quit()
+            elif event.type == MOUSEBUTTONDOWN:
+                if event.button == 1:  # Left mouse button clicked
+                    pos = pygame.mouse.get_pos()
+                    selected_edge = self.get_selected_edge(pos)
+                    if selected_edge and selected_edge in self.legal_move_edges():
+                        self.board.edges[selected_edge[0]][selected_edge[1]]['EdgeType'] = self.current_player
+                        # self.box(selected_edge)
+                        return self.draw_board(selected_edge)  # Update the display after a valid mouse click
 
     # def draw_board(self, selected_edge=None):
     #     screen = pygame.display.set_mode((800, 600), RESIZABLE)
@@ -226,7 +209,7 @@ class Board:
     def get_selected_edge(self, pos):
         # Iterate over the edges and find the edge closest to the mouse click
         print(self.board.edges())
-        min_distance = 1000
+        min_distance = 10
         for edge in self.board.edges():
             print(edge)
             start_pos = self.positions[edge[0]]
@@ -237,11 +220,14 @@ class Board:
                        ((end_pos[1] - start_pos[1]) ** 2 + (end_pos[0] - start_pos[0]) ** 2) ** 0.5
             # If the distance is within a certain threshold, consider it as a click on the edge
             print(distance)
-            if distance < min_distance:  # You can adjust the threshold as needed
-                print(edge)
-                return edge
+            if distance < min_distance:
+                min_distance = distance
+                closest_edge = edge
+                print(closest_edge)
             else:
-                return None
+                pass
+        return closest_edge
+
 
 
 class Play:
