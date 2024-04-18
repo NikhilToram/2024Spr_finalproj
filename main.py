@@ -1,6 +1,5 @@
 import copy
 import random
-
 import networkx as nx
 import matplotlib.pyplot as plt
 #import pygame
@@ -168,6 +167,8 @@ class Play:
         self.current_player = self.players[0]
         self.box_counts = {player: 0 for player in self.players}
         self.start = self.play()
+        self.mode = self.opponent()
+        self.difficulty = None
 
     def ask_for_selection(self, player, legal_moves):
         """
@@ -192,37 +193,25 @@ class Play:
         :param player: current player
         :return:
         """
-        still_legal_moves = self.board.legal_move_edges(self.board.board)
+        if self.mode == 'H' or player == 'player1':
+            still_legal_moves = self.board.legal_move_edges(self.board.board)
 
-        move = self.ask_for_selection(player, still_legal_moves)
-        try:
-            if move in still_legal_moves:
-                self.board.board[move[0]][move[1]]['EdgeType'] = player
-            else:
-                print("That edge has already been played! Try again!")
+            move = self.ask_for_selection(player, still_legal_moves)
+            try:
+                if move in still_legal_moves:
+                    self.board.board[move[0]][move[1]]['EdgeType'] = player
+                else:
+                    print("That edge has already been played! Try again!")
+                    self.selection(player)
+            except KeyError or ValueError:
+                print("That edge doesn't exist! Try again!")
                 self.selection(player)
-        except KeyError or ValueError:
-            print("That edge doesn't exist! Try again!")
-            self.selection(player)
-            # TODO: Needs to be fixed
-        return self.advanced_box(player)
-
-    # def box(self, move):
-    #     node1, node2 = move[0], move[1]
-    #     player_edges = [(u, v, d) for u, v, d in self.board.board.edges(data=True) if d['EdgeType'] in self.players]
-    #     only_played_board = nx.Graph(player_edges)
-    #     only_played_board.add_edge(node1, node2, EdgeType=self.current_player)  # Add the move to the board
-    #     closed_loops = nx.cycle_basis(only_played_board)  # Find all closed loops
-    #
-    #     for loop in closed_loops:
-    #         if len(loop) == 4:  # If the loop has 4 edges, it encloses a box
-    #             # Determine the player who completes the box
-    #             players_in_loop = set(
-    #                 only_played_board[u][v]['EdgeType'] for u, v in zip(loop, loop[1:] + [loop[0]]))
-    #             completing_player = next(iter(players_in_loop - {'unplayed', 'unplayable'}), None)
-    #             if completing_player:
-    #                 self.box_counts[completing_player] += 1
-    #     return self.box_counts
+                # TODO: Needs to be fixed
+            return self.advanced_box(player)
+        elif self.mode == 'C' and player == 'player2':
+            move = self.AI.MiniMax(self.board.board, self.difficulty,
+                                     moves = self.board.legal_move_edges(self.board.board))
+            self.board.board[move[0]][move[1]]['EdgeType'] = player
 
     def neighbors_boxed(self, neighbors):
         """
@@ -438,22 +427,23 @@ class Play:
         return {'player1': player_1_score,  'player2': player_2_score}, captured
 
     def opponent(self):
-        opp = (input('To play against the computer, enter C. To play against a human opponent, type H.')).lower()
+        opp = (input('To play against the computer, enter C. To play against a human opponent, type H.')).upper()
         try:
-            if opp == 'c':
-                i = 1 # <- dummy
-                # Play AI
-            elif opp == 'h':
-                pass
+            if opp == 'C':
+                self.mode = 'C'
+                self.AI = AI_player()
+                self.difficulty = self.AI.depth
+
+            elif opp == 'C':
+                self.mode = 'H'
         except ValueError:
             opp = self.opponent()
         return opp
 
     def play(self):
+        self.opponent()
         players = ['player1', 'player2']
         player = 0
-        # opponent = self.opponent()
-        # TODO: add opponent
         while len(self.board.legal_move_edges(self.board.board)) > 0:
             box_added = self.selection(players[player])
             unstable = True
@@ -471,11 +461,11 @@ class Play:
             self.board.show_board(scores, players[player])
         return 0
 
-Play()
+
+
 class AI_player:
     def __init__(self):
-        self.game = Play()
-        self.score = self.game.player_scores
+        # self.score = player_scores
 
         self.depth = self.difficulty()
 
@@ -496,9 +486,6 @@ class AI_player:
         except ValueError:
             return self.difficulty()
 
-    def alpha_beta(self):
-        return self.depth
-
     def MiniMax(self, board: Board, depth_play, moves: list):
         # find the minimum of the scores
         # find the maximum
@@ -506,12 +493,20 @@ class AI_player:
         maximum = -20000
         for move in moves:
             move_heuristic = self.heuristic(player, move)
-            if move_heuristic> maximum:
+            if move_heuristic > maximum:
                 maximum = move_heuristic
 
-    def heuristic(self):
-        return (-1*self.score['player1'])+self.score['player2']
+    def heuristic(self, board: Board, player, move):
+        board_copy = board.copy()
+        all_possible = [self.game.board.legal_move_edges()]
+        min = 0
+        max = 0
+        for move in all_possible:
 
 
+            return (-1*self.score['player1'])+self.score['player2']
+
+
+Play()
 
 
