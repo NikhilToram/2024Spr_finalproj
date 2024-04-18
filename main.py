@@ -410,10 +410,22 @@ class Play:
         print(f"player1: {player_1_score},  player2: {player_2_score}")
         return {'player1': player_1_score,  'player2': player_2_score}, captured
 
+    def opponent(self):
+        opp = (input('To play against the computer, enter C. To play against a human opponent, type H.')).lower()
+        try:
+            if opp == 'c':
+            # Play AI
+            elif opp == 'h':
+                pass
+        except ValueError:
+            opp = self.opponent()
+        return opp
+
     def play(self):
         players = ['player1', 'player2']
         player = 0
-
+        # opponent = self.opponent()
+        # TODO: add opponent
         while len(self.board.legal_move_edges(self.board.board)) > 0:
             box_added = self.selection(players[player])
             unstable = True
