@@ -15,7 +15,7 @@ class Board:
         self.edge_number_dict = {}
         self.edge_number_dict_r = {}
         self.board, self.positions, self.circle, self.triangle, self.square, self.initial_nodes, self.edge_numbers = self.create_base_board()
-
+    plt.clf()
     def legal_move_edges(self, default_board):
         """
         This function calculates the valid moves for the game
@@ -37,7 +37,7 @@ class Board:
         try:
             return [int(option)+1, int(option)+1]
         except ValueError:
-            print(f'You have chosen an invalid input. '
+            print(f'You have chosen an invalid input.'
                   f'Please enter the number corresponding to the size of game you want to play. \ni.e., 1, 2, or 3.')
             return self.select_dimension()
     def create_base_board(self):
@@ -201,10 +201,10 @@ class Play:
                 if move in still_legal_moves:
                     self.board.board[move[0]][move[1]]['EdgeType'] = player
                 else:
-                    print("That edge has already been played! Try again!")
+                    print("\nThat edge has already been played! Try again!")
                     self.selection(player)
             except KeyError or ValueError:
-                print("That edge doesn't exist! Try again!")
+                print("\nThat edge doesn't exist! Try again!")
                 self.selection(player)
                 # TODO: Needs to be fixed
             return self.advanced_box(player)
@@ -459,6 +459,7 @@ class Play:
             else:
                 print('You won a box!!!')
             self.board.show_board(scores, players[player])
+        print(f'{"Player 1" if scores["player1"]>scores["player2"] else "Player 2"} wins!')
         return 0
 
 
@@ -498,11 +499,9 @@ class AI_player:
 
     def heuristic(self, board: Board, player, move):
         all_possible = [self.game.board.legal_move_edges()]
-        min = 0
-        max = 0
         for move in all_possible:
             board_copy = board.copy()
-
+            Play.selection(move)
             return (-1*self.score['player1'])+self.score['player2']
 
 
