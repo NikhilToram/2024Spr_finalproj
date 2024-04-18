@@ -18,6 +18,11 @@ class Board:
         self.board, self.positions, self.circle, self.triangle, self.square, self.initial_nodes, self.edge_numbers = self.create_base_board()
 
     def legal_move_edges(self, default_board):
+        """
+        This function calculates the valid moves for the game
+        :param default_board: dummy variable
+        :return:
+        """
         legal_moves = []
         for edge in nx.edges(default_board if default_board else self.board):
             if default_board[edge[0]][edge[1]]['EdgeType'] == 'unplayed':
@@ -25,6 +30,10 @@ class Board:
         return legal_moves
 
     def select_dimension(self):
+        """
+        Asks user for dimension n for nxn board
+        :return:
+        """
         option = (input(f'Please enter the integer (n) dimension of the (nxn) grid you want from 3 to 15.'))
         try:
             return [int(option)+1, int(option)+1]
@@ -33,6 +42,11 @@ class Board:
                   f'Please enter the number corresponding to the size of game you want to play. \ni.e., 1, 2, or 3.')
             return self.select_dimension()
     def create_base_board(self):
+        """
+        This function creates the original game board which will be updated throughout the game in other functions.
+        This is only responsible for the original board (before any gameplay)
+        :return: board
+        """
         regular_lattice = nx.grid_2d_graph(self.dim[0], self.dim[1])
         shapes = ['o', '^', 's']
         total_cells = self.dim[0]*self.dim[1]
@@ -107,36 +121,14 @@ class Board:
         plt.show()
         return regular_lattice, pos, circle, triangle, square, initial_nodes, self.edge_numbers
 
-    # def draw_board(self):
-    #     # Calculate the dimensions of the board
-    #     max_x = max(pos[0] for pos in self.positions.values())
-    #     min_x = min(pos[0] for pos in self.positions.values())
-    #     max_y = max(pos[1] for pos in self.positions.values())
-    #     min_y = min(pos[1] for pos in self.positions.values())
-    #
-    #     # Calculate the center of the board
-    #     center_x = (max_x + min_x) / 2
-    #     center_y = (max_y + min_y) / 2
-    #
-    #     # Calculate the offset to center the board
-    #     offset_x = 600 - center_x  # Half of the screen width is 600
-    #     offset_y = 600 - center_y  # Assuming a square display
-    #
-    #     screen = pygame.display.set_mode((800, 600))
-    #     screen.fill((255, 255, 255))
-    #     for edge in self.board.edges():
-    #         # Adjust the positions based on the offset
-    #         adjusted_start = (self.positions[edge[0]][0] + offset_x, self.positions[edge[0]][1] + offset_y)
-    #         adjusted_end = (self.positions[edge[1]][0] + offset_x, self.positions[edge[1]][1] + offset_y)
-    #         pygame.draw.line(screen, self.color_dict[self.board[edge[0]][edge[1]]['EdgeType']],
-    #                          adjusted_start, adjusted_end, 3)
-    #     for node in self.board.nodes():
-    #         # Adjust the positions based on the offset
-    #         adjusted_pos = (self.positions[node][0] + offset_x, self.positions[node][1] + offset_y)
-    #         pygame.draw.circle(screen, (0, 0, 0), adjusted_pos, 20)
-    #     pygame.display.flip()
 
     def show_board(self, scores: dict, player):
+        """
+        This function is the board updating function. It creates a new board after every move.
+        :param scores: Current player scores
+        :param player: current player
+        :return:
+        """
         # EdgeType = nx.get_edge_attributes(self.board, 'EdgeType').values()
         # nx.draw_networkx(self.board, pos=self.positions, with_labels=True, node_color='darkgrey', node_size=250,
         #                  edge_color=[self.color_dict[Edge] for Edge in EdgeType],
@@ -152,8 +144,8 @@ class Board:
                          nodelist=self.initial_nodes,node_shape='o',
                          font_size=5, style=[self.style_dict[Edge] for Edge in EdgeType])
         nx.draw_networkx_edge_labels(self.board, self.positions,
-                                     edge_labels={edge: self.edge_number_dict[edge] for edge in self.edge_numbers if self.label_edge_dict[self.board[edge[0]][edge[1]]['EdgeType']]},
-                                     #edge_labels=self.edge_number_dict,
+                                     edge_labels={edge: self.edge_number_dict[edge] for edge in self.edge_numbers if
+                                                  self.label_edge_dict[self.board[edge[0]][edge[1]]['EdgeType']]},
                                      font_color='black', font_size=([12 if self.dim[0] < 6 else 8 if self.dim[0]<=9 else 5][0]), font_weight='bold', rotate=0)
         nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.circle, label=False, node_shape='o',
                                node_color='purple', node_size=[200 if self.dim[0] < 6 else 75 if self.dim[0]>9 else 100])
@@ -178,6 +170,12 @@ class Play:
         self.start = self.play()
 
     def ask_for_selection(self, player, legal_moves):
+        """
+        This function asks the user for the move they'd like to play
+        :param player: current player
+        :param legal_moves: the valid moves at the turn when this is called
+        :return:
+        """
         # print(f'The available moves are as follows:')
         # for edge in self.board.edge_number_dict.keys():
             # if edge in legal_moves:
@@ -188,6 +186,12 @@ class Play:
         # Todo: If input > max(self.board.edge_number_dict_r[selection]) -> try again
 
     def selection(self, player):
+        """
+        This function makes the move that was specified in self.ask_for_selection(). If an edge is selected that has
+        already been played, the user will be prompted to pick a new edge.
+        :param player: current player
+        :return:
+        """
         still_legal_moves = self.board.legal_move_edges(self.board.board)
 
         move = self.ask_for_selection(player, still_legal_moves)
@@ -200,7 +204,7 @@ class Play:
         except KeyError or ValueError:
             print("That edge doesn't exist! Try again!")
             self.selection(player)
-
+            # TODO: Needs to be fixed
         return self.advanced_box(player)
 
     # def box(self, move):
@@ -221,6 +225,11 @@ class Play:
     #     return self.box_counts
 
     def neighbors_boxed(self, neighbors):
+        """
+        This function determines if a box has been made
+        :param neighbors: edge neighbors
+        :return: bool
+        """
         valid_connection_counter = 0
         neighbors = list(neighbors)
         # print(neighbors)
@@ -267,6 +276,11 @@ class Play:
             return False
 
     def advanced_box(self, player):
+        """
+        Determines what shape has been boxed in.
+        :param player: current player
+        :return:
+        """
         boxed = False
         # for node in self.board.circle:
         #     neighbours = nx.neighbors(self.board.board, node)
@@ -311,6 +325,13 @@ class Play:
         return boxed
 
     def redraw_map(self, nodes, player, shape):
+        """
+        This function remaps the board by assigning a box to a player once it has been captured
+        :param nodes:
+        :param player:
+        :param shape:
+        :return:
+        """
         for node in nodes:
             self.score_tracker[node] = shape
             neighbors = list(nx.neighbors(self.board.board, node))
@@ -341,6 +362,12 @@ class Play:
             #     pass
 
     def capturing_shape(self, shape, player):
+        """
+        This function calls self.redraw_map() and self.player_scores()
+        :param shape:
+        :param player:
+        :return:
+        """
         shape_functions = {'triangle': self.board.triangle, 'square': self.board.square, 'circle': self.board.circle}
         self.redraw_map(shape_functions[shape], player, shape)
         self.player_scores[self.players[int(not bool(self.players.index(player)))]][shape] = 0
@@ -414,7 +441,8 @@ class Play:
         opp = (input('To play against the computer, enter C. To play against a human opponent, type H.')).lower()
         try:
             if opp == 'c':
-            # Play AI
+                i = 1 # <- dummy
+                # Play AI
             elif opp == 'h':
                 pass
         except ValueError:
@@ -481,13 +509,9 @@ class AI_player:
             if move_heuristic> maximum:
                 maximum = move_heuristic
 
+    def heuristic(self):
+        return (-1*self.score['player1'])+self.score['player2']
 
-    # def alpha_beta(self):
-    #
-    #
-    # def heuristic(self):
-    #     return (-1*self.score['player1'])+self.score['player2']
-    #
-    #
+
 
 
