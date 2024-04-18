@@ -158,8 +158,8 @@ class Board:
 
 
 class Play:
-    def __init__(self):
-        self.board = Board()
+    def __init__(self, board=Board()):
+        self.board = board
         self.score_tracker = {}
         self.player_scores = {'player1': {'circle': 0, 'triangle': 0, 'square': 0},
                               'player2': {'circle': 0, 'triangle': 0, 'square': 0}}
@@ -209,8 +209,9 @@ class Play:
                 # TODO: Needs to be fixed
             return self.advanced_box(player)
         elif self.mode == 'C' and player == 'player2':
-            move = self.AI.MiniMax(self.board.board, self.difficulty,
+            move, _ = self.AI.MiniMax(self.board.board, self.difficulty,
                                      moves = self.board.legal_move_edges(self.board.board))
+            print(f'Ai move: {move}')
             self.board.board[move[0]][move[1]]['EdgeType'] = player
 
     def neighbors_boxed(self, neighbors):
@@ -489,51 +490,55 @@ class AI_player:
     def alpha_beta(self):
         return self.depth
 
-    def MiniMax(self, board: Board, depth_play, moves: list, played_moves: list):
+    def MiniMax(self, board: Board, depth_play, moves: list, played_moves=[]):
         # find the minimum of the scores
         # find the maximum
         player = 'player2'
         maximum = -20000
         played_moves.append('')
         best_move = None
-        moves_copy = moves.copy()
-        if depth_play < 2:
+        #moves_copy = moves.copy()
+        #print(f'minimax: depth_play: {depth_play}, moves: {moves}')
+        if depth_play < 2 or len(moves) == 1:
             for move in moves:
                 played_moves[-1] = move
-                move_heuristic = self.heuristic(player, played_moves)
+                move_heuristic = self.heuristic(board, player, played_moves)
                 if move_heuristic > maximum:
                     maximum = move_heuristic
                     best_move = move
             return best_move
         else:
             for move in moves:
+                moves_copy = moves.copy()
                 played_moves[-1] = move
                 moves_copy.remove(move)
-                _, move_heuristic = self.Minimum(board, depth_play, moves_copy, played_moves)
+                _, move_heuristic = self.Minimum(board, depth_play-1, moves_copy, played_moves)
                 if move_heuristic > maximum:
                     maximum = move_heuristic
                     best_move = move, maximum
             return best_move
 
-    def Minimum(self, board: Board, depth_play, moves: list, played_moves: []):
+    def Minimum(self, board: Board, depth_play, moves: list, played_moves: list):
         player = 'player1'
         minimum = 20000
         played_moves.append('')
         best_move = moves[0]
-        moves_copy = moves.copy()
-        if depth_play < 2:
+        #moves_copy = moves.copy()
+        #print(f'Minimum: depth_play: {depth_play}, moves: {moves}')
+        if depth_play < 2 or len(moves) == 1:
             for move in moves:
                 played_moves[-1] = move
-                move_heuristic = self.heuristic(player, played_moves)
+                move_heuristic = self.heuristic(board, player, played_moves)
                 if move_heuristic < minimum:
                     minimum = move_heuristic
                     best_move = move
             return best_move, minimum
         else:
             for move in moves:
+                moves_copy = moves.copy()
                 played_moves[-1] = move
                 moves_copy.remove(move)
-                _, move_heuristic = self.Maximum(board, depth_play, moves_copy, played_moves)
+                _, move_heuristic = self.Maximum(board, depth_play-1, moves_copy, played_moves)
                 if move_heuristic < minimum:
                     minimum = move_heuristic
                     best_move = move, minimum
@@ -544,27 +549,32 @@ class AI_player:
         maximum = -20000
         played_moves.append('')
         best_move = None
-        moves_copy = moves.copy()
+        #print(f'Maximum: depth_play: {depth_play}, moves: {moves}')
         if depth_play < 2 or len(moves) == 1:
             for move in moves:
                 played_moves[-1] = move
-                move_heuristic = self.heuristic(player, played_moves)
+                move_heuristic = self.heuristic(board, player, played_moves)
                 if move_heuristic > maximum:
                     maximum = move_heuristic
                     best_move = move
             return best_move, maximum
         else:
             for move in moves:
+                moves_copy = moves.copy()
                 played_moves[-1] = move
                 moves_copy.remove(move)
-                _, move_heuristic = self.Minimum(board, depth_play, moves_copy, played_moves)
+                _, move_heuristic = self.Minimum(board, depth_play-1, moves_copy, played_moves)
                 if move_heuristic > maximum:
                     maximum = move_heuristic
                     best_move = move, maximum
             return best_move, maximum
 
-
-    def heuristic(self, board: Board, player, move):
+    def heuristic_idea_test(self, board: Board, player, moves):
+        AI_play = Play(board)
+        # todo: modify the play method in the Play class like in the above class to start at a custom player and play a predefined moves
+    def heuristic(self, board: Board, player, moves):
+        return random.choice(list(range(-20, 20)))
+        board_copy = board.copy()
         all_possible = [self.game.board.legal_move_edges()]
         min = 0
         max = 0
