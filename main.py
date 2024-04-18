@@ -103,7 +103,7 @@ class Board:
         nx.draw_networkx_nodes(regular_lattice, pos, nodelist=square, node_shape='s',label=False, node_color='navy',
                                node_size=[200 if self.dim[0] < 6 else 75 if self.dim[0]>9 else 100])
         plt.title("Regular 2d")
-        plt.figure(dpi=1000)
+        plt.figure(dpi=500)
         plt.show()
         return regular_lattice, pos, circle, triangle, square, initial_nodes, self.edge_numbers
 
