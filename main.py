@@ -11,6 +11,7 @@ class Board:
     def __init__(self):
         self.style_dict = {'player1': 'solid', 'player2': 'solid', 'unplayed': 'dashed', 'unplayable': 'solid'}
         self.color_dict = {'player1': 'red', 'player2': 'lightskyblue', 'unplayed': 'black', 'unplayable': 'white'}
+        self.label_edge_dict = {'player1': False, 'player2': False, 'unplayed': True, 'unplayable': False}
         self.dim = self.select_dimension()
         self.edge_number_dict = {}
         self.edge_number_dict_r = {}
@@ -39,7 +40,6 @@ class Board:
         triangle_num = int(0.3*total_cells)
         square_num = total_cells-circle_num-triangle_num
         pattern = shapes[0]*(circle_num) + shapes[1]*(triangle_num) + shapes[2]*(square_num)
-        #random.shuffle(pattern)
         pattern = list(pattern)
         random.shuffle(pattern)
         pos = {(x, y): (y, -x) for x, y in regular_lattice.nodes()}
@@ -90,15 +90,15 @@ class Board:
         EdgeType = nx.get_edge_attributes(regular_lattice, 'EdgeType').values()
         NodeShape = list(nx.get_node_attributes(regular_lattice, 'NodeShape').values())
         #print(NodeShape)
-        nx.draw_networkx(regular_lattice, pos=pos, with_labels=False, node_color='darkgrey', node_size=250,
+        nx.draw_networkx(regular_lattice, pos=pos, with_labels=False, node_color='darkgrey', node_size=50,
                          edge_color=[self.color_dict[Edge] for Edge in EdgeType], nodelist = initial_nodes,
                          node_shape= 'o',
                          font_size=5, style=[self.style_dict[Edge] for Edge in EdgeType])
         nx.draw_networkx_edge_labels(regular_lattice, pos, edge_labels=self.edge_number_dict,
                                      font_color='black', font_size=10, font_weight='bold', rotate=0)
-        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=circle, node_shape='o', label=False, node_color='green')
+        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=circle, node_shape='o', label=False, node_color='purple')
         nx.draw_networkx_nodes(regular_lattice, pos, nodelist=triangle, node_shape='^',label=False, node_color='green')
-        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=square, node_shape='s',label=False, node_color='green')
+        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=square, node_shape='s',label=False, node_color='navy')
         plt.title("Regular 2d")
         plt.figure(dpi=500)
         plt.show()
@@ -144,15 +144,17 @@ class Board:
         EdgeType = nx.get_edge_attributes(self.board, 'EdgeType').values()
         NodeShape = list(nx.get_node_attributes(self.board, 'NodeShape').values())
         #print(NodeShape)
-        nx.draw_networkx(self.board, pos=self.positions, with_labels=False, node_color='darkgrey', node_size=250,
+        nx.draw_networkx(self.board, pos=self.positions, with_labels=False, node_color='darkgrey', node_size=50,
                          edge_color=[self.color_dict[Edge] for Edge in EdgeType],
                          nodelist=self.initial_nodes,node_shape='o',
                          font_size=5, style=[self.style_dict[Edge] for Edge in EdgeType])
-        nx.draw_networkx_edge_labels(self.board, self.positions, edge_labels=self.edge_number_dict,
+        nx.draw_networkx_edge_labels(self.board, self.positions,
+                                     edge_labels={edge: self.edge_number_dict[edge] for edge in self.edge_numbers if self.label_edge_dict[self.board[edge[0]][edge[1]]['EdgeType']]},
+                                     #edge_labels=self.edge_number_dict,
                                      font_color='black', font_size=10, font_weight='bold', rotate=0)
-        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.circle, label=False, node_shape='o', node_color='green')
+        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.circle, label=False, node_shape='o', node_color='purple')
         nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.triangle, label=False, node_shape='^', node_color='green')
-        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.square, label=False, node_shape='s', node_color='green')
+        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.square, label=False, node_shape='s', node_color='navy')
         plt.title(f"Scores: Player 1 (red) has {scores['player1']} points and Player 2(blue) has {scores['player2']} points\nCurrent player: {player}")
         plt.figure(dpi=500)
         plt.show()
@@ -170,10 +172,10 @@ class Play:
         self.start = self.play()
 
     def ask_for_selection(self, player, legal_moves):
-        print(f'The available moves are as follows:')
-        for edge in self.board.edge_number_dict.keys():
-            if edge in legal_moves:
-                print(f'{self.board.edge_number_dict[edge]}')
+        # print(f'The available moves are as follows:')
+        # for edge in self.board.edge_number_dict.keys():
+            # if edge in legal_moves:
+            #     print(f'{self.board.edge_number_dict[edge]}')
 
         selection = int(input('Make a move. Enter the index of the move you want to play: '))
         return self.board.edge_number_dict_r[selection]
@@ -454,11 +456,12 @@ class AI_player:
                 maximum = move_heuristic
 
 
-    def min(self):
-
-    def heuristic(self):
-        return (-1*self.score['player1'])+self.score['player2']
-
-
+    # def alpha_beta(self):
+    #
+    #
+    # def heuristic(self):
+    #     return (-1*self.score['player1'])+self.score['player2']
+    #
+    #
 
 
