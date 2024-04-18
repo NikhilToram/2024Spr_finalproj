@@ -95,12 +95,15 @@ class Board:
                          node_shape= 'o',
                          font_size=5, style=[self.style_dict[Edge] for Edge in EdgeType])
         nx.draw_networkx_edge_labels(regular_lattice, pos, edge_labels=self.edge_number_dict,
-                                     font_color='black', font_size=10, font_weight='bold', rotate=0)
-        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=circle, node_shape='o', label=False, node_color='purple')
-        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=triangle, node_shape='^',label=False, node_color='green')
-        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=square, node_shape='s',label=False, node_color='navy')
+                                     font_color='black', font_size=([12 if self.dim[0] < 6 else 8 if self.dim[0]<=9 else 5][0]), font_weight='bold', rotate=0)
+        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=circle, node_shape='o', label=False, node_color='purple',
+                               node_size=[200 if self.dim[0] < 6 else 75 if self.dim[0]>9 else 100])
+        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=triangle, node_shape='^',label=False, node_color='green',
+                               node_size=[200 if self.dim[0] < 6 else 75 if self.dim[0]>9 else 100])
+        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=square, node_shape='s',label=False, node_color='navy',
+                               node_size=[200 if self.dim[0] < 6 else 75 if self.dim[0]>9 else 100])
         plt.title("Regular 2d")
-        plt.figure(dpi=500)
+        plt.figure(dpi=1000)
         plt.show()
         return regular_lattice, pos, circle, triangle, square, initial_nodes, self.edge_numbers
 
@@ -151,10 +154,13 @@ class Board:
         nx.draw_networkx_edge_labels(self.board, self.positions,
                                      edge_labels={edge: self.edge_number_dict[edge] for edge in self.edge_numbers if self.label_edge_dict[self.board[edge[0]][edge[1]]['EdgeType']]},
                                      #edge_labels=self.edge_number_dict,
-                                     font_color='black', font_size=10, font_weight='bold', rotate=0)
-        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.circle, label=False, node_shape='o', node_color='purple')
-        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.triangle, label=False, node_shape='^', node_color='green')
-        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.square, label=False, node_shape='s', node_color='navy')
+                                     font_color='black', font_size=([12 if self.dim[0] < 6 else 8 if self.dim[0]<=9 else 5][0]), font_weight='bold', rotate=0)
+        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.circle, label=False, node_shape='o',
+                               node_color='purple', node_size=[200 if self.dim[0] < 6 else 75 if self.dim[0]>9 else 100])
+        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.triangle, label=False, node_shape='^',
+                               node_color='green', node_size=[200 if self.dim[0] < 6 else 75 if self.dim[0]>9 else 100])
+        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.square, label=False, node_shape='s',
+                               node_color='navy', node_size=[200 if self.dim[0] < 6 else 75 if self.dim[0]>9 else 100])
         plt.title(f"Scores: Player 1 (red) has {scores['player1']} points and Player 2(blue) has {scores['player2']} points\nCurrent player: {player}")
         plt.figure(dpi=500)
         plt.show()
@@ -177,15 +183,23 @@ class Play:
             # if edge in legal_moves:
             #     print(f'{self.board.edge_number_dict[edge]}')
 
-        selection = int(input('Make a move. Enter the index of the move you want to play: '))
+        selection = int(input('Make a move. Enter the edge number of the move you want to play: '))
         return self.board.edge_number_dict_r[selection]
+        # Todo: If input > max(self.board.edge_number_dict_r[selection]) -> try again
 
     def selection(self, player):
         still_legal_moves = self.board.legal_move_edges(self.board.board)
 
         move = self.ask_for_selection(player, still_legal_moves)
-        self.board.board[move[0]][move[1]]['EdgeType'] = player
-        #self.board.draw_board()
+        try:
+            if move in still_legal_moves:
+                self.board.board[move[0]][move[1]]['EdgeType'] = player
+            else:
+                print("That edge has already been played! Try again!")
+                self.selection(player)
+        except KeyError or ValueError:
+            print("That edge doesn't exist! Try again!")
+            self.selection(player)
 
         return self.advanced_box(player)
 
@@ -209,7 +223,7 @@ class Play:
     def neighbors_boxed(self, neighbors):
         valid_connection_counter = 0
         neighbors = list(neighbors)
-        print(neighbors)
+        # print(neighbors)
         # try:
         #     if self.board.board[neighbors[0]][neighbors[1]]['EdgeType'] in ['player1', 'player2']:
         #         valid_connection_counter += 1
@@ -283,7 +297,7 @@ class Play:
         #             self.score_tracker[node] = 'square'
         #             self.player_scores[player]['square'] += 1
         #             boxed = True
-        shape_functions = {'triangle':self.board.triangle, 'square':self.board.square, 'circle':self.board.circle}
+        shape_functions = {'triangle': self.board.triangle, 'square': self.board.square, 'circle': self.board.circle}
         for shape in shape_functions.keys():
             for node in shape_functions[shape]:
                 neighbours = nx.neighbors(self.board.board, node)
@@ -327,7 +341,7 @@ class Play:
             #     pass
 
     def capturing_shape(self, shape, player):
-        shape_functions = {'triangle':self.board.triangle, 'square':self.board.square, 'circle':self.board.circle}
+        shape_functions = {'triangle': self.board.triangle, 'square': self.board.square, 'circle': self.board.circle}
         self.redraw_map(shape_functions[shape], player, shape)
         self.player_scores[self.players[int(not bool(self.players.index(player)))]][shape] = 0
         # if shape == 'circle':
