@@ -194,12 +194,13 @@ class Play():
                 print("\nThat edge doesn't exist! Try again!")
                 self.selection(player)
                 # TODO: Needs to be fixed
-            return self.advanced_box(player)
+            #return self.advanced_box(player)
         elif self.mode == 'C' and player == 'player2':
             move, _ = self.AI.MiniMax(self.board.board, self.difficulty,
                                       moves=self.board.legal_move_edges(self.board.board))
             print(f'Ai move: {move}')
             self.board.board[move[0]][move[1]]['EdgeType'] = player
+        return self.advanced_box(player)
 
     def neighbors_boxed(self, neighbors):
         """
@@ -495,7 +496,7 @@ class AI_player:
             return best_move, maximum
 
     # def heuristic_idea_test(self, board: Board, player, moves):
-        # todo: modify the play method in the Play class like in the above class to start at a custom player and play a predefined moves
+    #     todo: modify the play method in the Play class like in the above class to start at a custom player and play a predefined moves
     def heuristic(self, board: Board, player, moves):
         play_AI = Play(board, opponent='C')
         print(moves)
