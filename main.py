@@ -492,6 +492,8 @@ class AI_player:
         return self.depth
 
     def MiniMax(self, board: Board, depth_play, moves: list, played_moves=[]):
+        # todo: currently the program runs on an assumption of alternating turn, add functionality to check for and
+        #  accommodate the possibility of repeating turns.
         # find the minimum of the scores
         # find the maximum
         player = 'player2'
