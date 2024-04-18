@@ -83,11 +83,11 @@ class Board:
                 regular_lattice.add_edge((x + 0.5, y + 0.5), (x+1, y), EdgeType='unplayable')
                 pos[(x+0.5, y+0.5)] = ((y+0.5), -(x+0.5))
                 i = i + 1
-        for node in regular_lattice.nodes():
-            print(f"for node {node} NodeType is: {regular_lattice.nodes[node]['NodeType']}")
+        # for node in regular_lattice.nodes():
+            # print(f"for node {node} NodeType is: {regular_lattice.nodes[node]['NodeType']}")
         i = 0
         self.edge_numbers = self.legal_move_edges(regular_lattice)
-        print(self.edge_numbers)
+        # print(self.edge_numbers)
         for edge in regular_lattice.edges():
             if edge in self.edge_numbers:
 
@@ -95,10 +95,10 @@ class Board:
                 self.edge_number_dict[edge] = i
                 self.edge_number_dict_r[i] = edge
                 i += 1
-                print(f"for edge connecting {edge}\n\tEdgeType is: {regular_lattice[edge[0]][edge[1]]['EdgeType']}"
-                      f"\n\tEdgeNumber is: {regular_lattice[edge[0]][edge[1]]['EdgeNumber']}")
-            else:
-                print(f"for edge connecting {edge}\n\tEdgeType is: {regular_lattice[edge[0]][edge[1]]['EdgeType']}")
+                # print(f"for edge connecting {edge}\n\tEdgeType is: {regular_lattice[edge[0]][edge[1]]['EdgeType']}"
+                #       f"\n\tEdgeNumber is: {regular_lattice[edge[0]][edge[1]]['EdgeNumber']}")
+            # else:
+            #     print(f"for edge connecting {edge}\n\tEdgeType is: {regular_lattice[edge[0]][edge[1]]['EdgeType']}")
 
         EdgeType = nx.get_edge_attributes(regular_lattice, 'EdgeType').values()
         NodeShape = list(nx.get_node_attributes(regular_lattice, 'NodeShape').values())
@@ -434,7 +434,7 @@ class Play:
                 self.AI = AI_player()
                 self.difficulty = self.AI.depth
 
-            elif opp == 'C':
+            elif opp == 'H':
                 self.mode = 'H'
         except ValueError:
             opp = self.opponent()
@@ -497,12 +497,11 @@ class AI_player:
                 maximum = move_heuristic
 
     def heuristic(self, board: Board, player, move):
-        board_copy = board.copy()
         all_possible = [self.game.board.legal_move_edges()]
         min = 0
         max = 0
         for move in all_possible:
-
+            board_copy = board.copy()
 
             return (-1*self.score['player1'])+self.score['player2']
 
