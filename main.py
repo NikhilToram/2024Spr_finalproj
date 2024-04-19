@@ -170,8 +170,9 @@ class Play():
         :return:
         """
         selection = int(input('Make a move. Enter the edge number of the move you want to play: '))
+        if selection > ((self.board.dim[0]*self.board.dim[1])-1):
+            selection = int(input("That move doesn't exist on this board. Try Again!"))
         return self.board.edge_number_dict_r[selection]
-        # Todo: If input > max(self.board.edge_number_dict_r[selection]) -> try again
 
     def selection(self, player):
         """
@@ -193,8 +194,7 @@ class Play():
             except KeyError or ValueError:
                 print("\nThat edge doesn't exist! Try again!")
                 self.selection(player)
-                # TODO: Needs to be fixed
-            #return self.advanced_box(player)
+
         elif self.mode == 'C' and player == 'player2':
             move, _ = self.AI.MiniMax(self.board.board, self.difficulty,
                                       moves=self.board.legal_move_edges(self.board.board))
