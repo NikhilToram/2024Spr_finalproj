@@ -1,569 +1,673 @@
-import math
-
+import copy
+import random
 import networkx as nx
 import matplotlib.pyplot as plt
-import matplotlib
-import math
-
-# G = nx.icosahedral_graph()
-# # pos = nx.planar_layout(G)
-# pos = nx.kamada_kawai_layout(G)
-# nx.draw(G, pos=pos, with_labels=True, node_color='skyblue', node_size=150, font_size=12, font_weight='bold', edge_color='gray')
-# # plt.show()
-#
-# # H = nx.truncated_tetrahedron_graph()
-# # H = nx.tetrahedral_graph()
-# # pos = nx.planar_layout(H)
-# # nx.draw(H, pos=pos, with_labels=True, node_color='skyblue', node_size=150, font_size=12, font_weight='bold', edge_color='gray')
-# # plt.show()
-# # X = nx.hexagonal_lattice_graph(1,1)
-#
-# #
-# # # # Draw the graph
-# # # nx.draw(C, pos=pos, with_labels=True, node_color='skyblue', node_size=150, font_size=12, font_weight='bold', edge_color='gray')
-# # # plt.title("Tetrahedral Graph")
-# # # plt.show()
-# #
-# # G = nx.Graph()
-# # G.add_nodes_from([0,1,2,3])
-# # G.add_edge(1,3, length = (math.sqrt(6)))
-# # G.add_edge(1,2, length = (math.sqrt(6)))
-# # G.add_edge(1,0, length = (math.sqrt(6)))
-# # G.add_edge(0,2, length = 2)
-# # G.add_edge(0,3, length = 2)
-# # G.add_edge(2,3, length = 2)
-# #
-# # pos = nx.planar_layout(G)
-# # nx.draw(G, pos)
-# # nx.draw(G, pos, with_labels= True, node_color='skyblue', node_size=150, font_size=12, font_weight='bold', edge_color='gray')
-# # nx.draw_networkx_edge_labels(G, pos)
-# # plt.show()
-#
-# G = nx.Graph()
-# G.add_nodes_from(range(0,9))
-# G.add_edge(0,1,length=2)
-# G.add_edge(1,2,length=2)
-# G.add_edge(2,3,length=2)
-# G.add_edge(3,4,length=2)
-# G.add_edge(4,5,length=2)
-# G.add_edge(5,0,length=2)
-# G.add_edge(5,6,length=0.726)
-# G.add_edge(1,7,length=0.726)
-# G.add_edge(3,8,length=0.726)
-# G.add_edge(2,7,length=1.754)
-# G.add_edge(0,7,length=1.754)
-# G.add_edge(0,6,length=1.754)
-# G.add_edge(4,6,length=1.754)
-# G.add_edge(4,8,length=1.754)
-# G.add_edge(8,2,length=1.754)
-# G.add_edge(6,8,length=2.208)
-# G.add_edge(7,8,length=2.208)
-# G.add_edge(6,7,length=2.208)
-#
-# pos = nx.spring_layout(G)
-# nx.draw(G, pos, with_labels= True, node_color='skyblue', node_size=150, font_size=12, font_weight='bold', edge_color='gray')
-# # nx.draw_networkx_edge_labels(G, pos)
-# # plt.show()
-#
-#
-# T1 = nx.Graph()
-# T1.add_nodes_from([0, 1, 9, 10])
-# height = math.sqrt(2/3)*2
-# T1.add_edge(10,9, length = height)
-# T1.add_edge(9,1, length = height)
-# T1.add_edge(0,9, length = height)
-# T1.add_edge(0,1, length = 2)
-# T1.add_edge(0,10, length = 2)
-# T1.add_edge(10,1, length = 2)
-# pos = nx.planar_layout(T1)
-# nx.draw(T1, pos, with_labels= True, node_color='skyblue', node_size=150, font_size=12, font_weight='bold', edge_color='gray')
-#
-# GT1 = nx.compose(G,T1)
-# pos = nx.spring_layout(GT1)
-# nx.draw(GT1, pos, with_labels= True, node_color='skyblue', node_size=150, font_size=12, font_weight='bold', edge_color='gray')
-# # plt.show()
-#
-# T2 = nx.Graph()
-# T2.add_nodes_from([1, 2, 11, 12])
-# height = math.sqrt(2/3)*2
-# T2.add_edge(11,2, length = height)
-# T2.add_edge(11,1, length = height)
-# T2.add_edge(11,12, length = height)
-# T2.add_edge(1,2, length = 2)
-# T2.add_edge(2,12, length = 2)
-# T2.add_edge(12,1, length = 2)
-# pos = nx.planar_layout(T2)
-# nx.draw(T2, pos, with_labels = True, node_color='skyblue', node_size=150, font_size=12, font_weight='bold', edge_color='gray')
-#
-# GT1T2 = nx.compose(GT1,T2)
-# pos = nx.spring_layout(GT1T2)
-# nx.draw(GT1T2, pos, with_labels= True, node_color='skyblue', node_size=150, font_size=12, font_weight='bold', edge_color='gray')
-# # plt.show()
-#
-# H = nx.Graph()
-# H.add_nodes_from([10, 1, 12, 21, 22, 23, 24, 25, 26])
-# H.add_edge(10, 1,length=2)
-# H.add_edge(10,21,length=2)
-# H.add_edge(21,22,length=2)
-# H.add_edge(22,23,length = 2)
-# H.add_edge(23,12,length=2)
-# H.add_edge(12,1,length=2)
-# H.add_edge(10,25,length=0.726)
-# H.add_edge(22,24,length=0.726)
-# H.add_edge(12,26,length=0.726)
-# H.add_edge(21,25,length=1.754)
-# H.add_edge(21,24,length=1.754)
-# H.add_edge(24,23, length=1.754)
-# H.add_edge(23,26,length=1.754)
-# H.add_edge(26,1, length=1.754)
-# H.add_edge(1,25,length=1.754)
-# H.add_edge(25,24,length=2.208)
-# H.add_edge(24,26, length=2.208)
-# H.add_edge(26,25,length=2.208)
-# pos = nx.spring_layout(H)
-# nx.draw(H, pos, with_labels= True, node_color='skyblue', node_size=150, font_size=12, font_weight='bold', edge_color='gray')
-#
-# GT1T2H = nx.disjoint_union(GT1T2,H)
-# pos = nx.spring_layout(GT1T2H)
-# nx.draw(GT1T2H, pos, with_labels= False, node_color='skyblue', node_size=150, font_size=12, font_weight='bold', edge_color='gray')
-# plt.show()
-#
-# # T1 = nx.Graph()
-# # T1.add_nodes_from([0, 1, 9, 10])
-# # height = math.sqrt(2/3)*2
-# # T1.add_edge(10,9, length = height)
-# # T1.add_edge(9,1, length = height)
-# # T1.add_edge(0,9, length = height)
-# # T1.add_edge(0,1, length = 2)
-# # T1.add_edge(0,10, length = 2)
-# # T1.add_edge(10,1, length = 2)
-# # pos = nx.planar_layout(T1)
-# # nx.draw(T1, pos, with_labels= True, node_color='skyblue', node_size=150, font_size=12, font_weight='bold', edge_color='gray')
-# # nx.draw_networkx_edge_labels(T1, pos)
-# # plt.show()
-
-
-
-
-import networkx as nx
-import matplotlib.pyplot as plt
-from shapely.geometry import LineString
-
-def pointed_star():
-    # Number of outer nodes (points of the star)
-    n = 5
-
-    # Create a complete graph for the outer nodes
-    outer_star = nx.complete_graph(n)
-
-    # Create a star graph for the central hub
-    hub = nx.star_graph([0])
-
-    # Combine the hub and the outer nodes
-    pointed_star = nx.compose(hub, outer_star)
-
-    # Set positions for the nodes in the outer star
-    outer_positions = nx.circular_layout(outer_star)
-
-    # Set positions for the central hub
-    hub_position = {0: (0, 0)}
-
-    # Merge positions
-    positions = {**hub_position, **outer_positions}
-
-    # Set the positions in the graph
-    nx.set_node_attributes(pointed_star, positions, 'pos')
-
-    # List to store intersection nodes to be added
-    intersection_nodes = []
-
-    # Iterate through all pairs of adjacent edges to find intersection points
-    for u, v in pointed_star.edges():
-        for x, y in pointed_star.edges():
-            if (u, v) != (x, y):
-                # Create LineString objects from the edge endpoints
-                line1 = LineString([pointed_star.nodes[u]['pos'], pointed_star.nodes[v]['pos']])
-                line2 = LineString([pointed_star.nodes[x]['pos'], pointed_star.nodes[y]['pos']])
-                # Check if the two edges intersect
-                intersection = line1.intersection(line2)
-                if intersection.is_empty:
-                    continue
-                # If intersection is a point, add it to the list
-                if intersection.geom_type == 'Point':
-                    intersection_nodes.append((intersection.x, intersection.y))
-
-    # Add intersection nodes to the graph
-    for node in intersection_nodes:
-        pointed_star.add_node(node, pos=node)
-
-    # Relabel nodes
-    nx.relabel_nodes(pointed_star, {(0.3090169521873281, 0.9510565683560541): 5}, copy=False)
-    nx.relabel_nodes(pointed_star, {(-0.8090170564954595, 0.587785261505403): 6}, copy=False)
-    nx.relabel_nodes(pointed_star, {(-0.11803401806840924, 0.36327126674823906): 7}, copy=False)
-    nx.relabel_nodes(pointed_star, {(0.3090170091047043, 0.22451397931316094): 8}, copy=False)
-    nx.relabel_nodes(pointed_star, {(-0.809016996890813, -0.5877853211100496): 9}, copy=False)
-    nx.relabel_nodes(pointed_star, {(0.30901704428157445, -0.22451399804788014): 10}, copy=False)
-    nx.relabel_nodes(pointed_star, {(-0.11803392502284099, -0.36327128532288977): 11}, copy=False)
-    nx.relabel_nodes(pointed_star, {(0.3090171011989445, -0.9510565087514076): 12}, copy=False)
-    nx.relabel_nodes(pointed_star, {(-0.3819660075375347, 6.783278650309795e-09): 13}, copy=False)
-
-    # Remove nodes and edges
-    nodes_to_remove = [9, 5, 12, 6, (1.0, 0.0)]
-    edges_to_remove = [(1, 2), (1, 0), (0, 4), (4, 3), (3, 2), (1, 4), (3, 1), (4, 2), (1, 9), (3, 1), (2, 0), (1, 4), (9, 0), (0, 3)]
-    pointed_star.remove_nodes_from(nodes_to_remove)
-    pointed_star.remove_edges_from(edges_to_remove)
-
-    pointed_star.add_edge(2,7)
-    pointed_star.add_edge(2,13)
-    pointed_star.add_edge(1,7)
-    pointed_star.add_edge(1,8)
-    pointed_star.add_edge(8,0)
-    pointed_star.add_edge(0,10)
-    pointed_star.add_edge(10,4)
-    pointed_star.add_edge(4,11)
-    pointed_star.add_edge(11,3)
-    pointed_star.add_edge(3,13)
-
-    # Print edges with the nodes they are connecting
-    print("Edges:")
-    for edge in pointed_star.edges():
-        print(f"Edge: {edge}, Nodes: {edge[0]}, {edge[1]}")
-
-    # Visualize the graph
-    plt.figure(figsize=(8, 8))
-    pos = nx.get_node_attributes(pointed_star, 'pos')
-    nx.draw_networkx(pointed_star, pos, with_labels=True, node_color='skyblue', node_size=1000, font_size=12)
-    nx.draw_networkx_edges(pointed_star, pos, edge_color='black')  # Draw edges
-    plt.title("Pointed Star Lattice with Nodes at Intersections")
-    return plt.show()
-
-pointed_star()
-
-
-def pointed_star_with_2_pentagons():
-     # Number of outer nodes (points of the star)
-    n = 5
-
-    # Create a complete graph for the outer nodes
-    outer_star = nx.complete_graph(n)
-
-    # Create a star graph for the central hub
-    hub = nx.star_graph([0])
-
-    # Combine the hub and the outer nodes
-    pointed_star = nx.compose(hub, outer_star)
-
-    # Set positions for the nodes in the outer star
-    outer_positions = nx.circular_layout(outer_star)
-
-    # Set positions for the central hub
-    hub_position = {0: (0, 0)}
-
-    # Merge positions
-    positions = {**hub_position, **outer_positions}
-
-    # Set the positions in the graph
-    nx.set_node_attributes(pointed_star, positions, 'pos')
-
-    # List to store intersection nodes to be added
-    intersection_nodes = []
-
-    # Iterate through all pairs of adjacent edges to find intersection points
-    for u, v in pointed_star.edges():
-        for x, y in pointed_star.edges():
-            if (u, v) != (x, y):
-                # Create LineString objects from the edge endpoints
-                line1 = LineString([pointed_star.nodes[u]['pos'], pointed_star.nodes[v]['pos']])
-                line2 = LineString([pointed_star.nodes[x]['pos'], pointed_star.nodes[y]['pos']])
-                # Check if the two edges intersect
-                intersection = line1.intersection(line2)
-                if intersection.is_empty:
-                    continue
-                # If intersection is a point, add it to the list
-                if intersection.geom_type == 'Point':
-                    intersection_nodes.append((intersection.x, intersection.y))
-
-    # Add intersection nodes to the graph
-    for node in intersection_nodes:
-        pointed_star.add_node(node, pos=node)
-
-    # Relabel nodes
-    nx.relabel_nodes(pointed_star, {(0.3090169521873281, 0.9510565683560541): 5}, copy=False)
-    nx.relabel_nodes(pointed_star, {(-0.8090170564954595, 0.587785261505403): 6}, copy=False)
-    nx.relabel_nodes(pointed_star, {(-0.11803401806840924, 0.36327126674823906): 7}, copy=False)
-    nx.relabel_nodes(pointed_star, {(0.3090170091047043, 0.22451397931316094): 8}, copy=False)
-    nx.relabel_nodes(pointed_star, {(-0.809016996890813, -0.5877853211100496): 9}, copy=False)
-    nx.relabel_nodes(pointed_star, {(0.30901704428157445, -0.22451399804788014): 10}, copy=False)
-    nx.relabel_nodes(pointed_star, {(-0.11803392502284099, -0.36327128532288977): 11}, copy=False)
-    nx.relabel_nodes(pointed_star, {(0.3090171011989445, -0.9510565087514076): 12}, copy=False)
-    nx.relabel_nodes(pointed_star, {(-0.3819660075375347, 6.783278650309795e-09): 13}, copy=False)
-
-    # Remove nodes and edges
-    nodes_to_remove = [9, 5, 12, 6, (1.0, 0.0)]
-    edges_to_remove = [(1, 2), (1, 0), (0, 4), (4, 3), (3, 2), (1, 4), (3, 1), (4, 2), (1, 9), (3, 1), (2, 0), (1, 4),
-                       (9, 0), (0, 3)]
-    pointed_star.remove_nodes_from(nodes_to_remove)
-    pointed_star.remove_edges_from(edges_to_remove)
-
-    pointed_star.add_edge(2, 7)
-    pointed_star.add_edge(2, 13)
-    pointed_star.add_edge(1, 7)
-    pointed_star.add_edge(1, 8)
-    pointed_star.add_edge(8, 0)
-    pointed_star.add_edge(0, 10)
-    pointed_star.add_edge(10, 4)
-    pointed_star.add_edge(4, 11)
-    pointed_star.add_edge(11, 3)
-    pointed_star.add_edge(3, 13)
-
-    # # Print edges with the nodes they are connecting
-    # print("Edges:")
-    # for edge in pointed_star.edges():
-    #     print(f"Edge: {edge}, Nodes: {edge[0]}, {edge[1]}")
-    #
-    # # Visualize the graph
-    # plt.figure(figsize=(8, 8))
-    pos_star = nx.get_node_attributes(pointed_star, 'pos')
-    nx.draw_networkx(pointed_star, pos_star, with_labels=True, node_color='skyblue', node_size=1000, font_size=12)
-    # nx.draw_networkx_edges(pointed_star, pos_star, edge_color='black')  # Draw edges
-    # plt.title("Pointed Star Lattice with Nodes at Intersections")
-    # plt.show()
-
-    # Define the positions of the existing nodes
-    positions = {
-        0: (1.0, 0.0),
-        1: (0.30901695, 0.95105657),
-        8: (0.3090170091047043, 0.22451397931316094),
-    }
-
-    # Calculate the distance between nodes 1 and 8
-    distance_18 = math.sqrt((positions[1][0] - positions[8][0]) ** 2 + (positions[1][1] - positions[8][1]) ** 2)
-    angle = math.atan2(positions[0][1] - positions[1][1], positions[0][0] - positions[1][0]) - math.atan2(
-        positions[8][1] - positions[1][1], positions[8][0] - positions[1][0])
-
-    # Calculate the distance between nodes 1 and 0
-    distance = math.sqrt((positions[1][0] - positions[0][0]) ** 2 + (positions[1][1] - positions[0][1]) ** 2)
-
-    # Calculate the angle between edge (1, 8) and the x-axis
-    angle_18 = math.atan2(positions[8][1] - positions[1][1], positions[8][0] - positions[1][0])
-
-    # Calculate the coordinates of node 14 to form a regular pentagon
-    x_14 = positions[8][0] + distance * math.cos(angle)
-    y_14 = positions[8][1] + distance * math.sin(angle)
-
-    # Calculate the angle between edge (1, 0) and the x-axis
-    angle_10 = math.atan2(positions[0][1] - positions[1][1], positions[0][0] - positions[1][0])
-
-    # Calculate the coordinates of node 15 to form a regular pentagon
-    x_15 = positions[0][0] + distance_18 * math.cos(angle_10)
-    y_15 = positions[0][1] + distance_18 * math.sin(angle_10)
-
-    # Define positions of nodes 14 and 15
-    additional_positions = {
-        14: (x_14 - .25, y_14 + .25),  # Adjust y-coordinate to be above other nodes
-        15: (x_15, -y_15),  # Adjust y-coordinate to be above other nodes
-    }
-
-    # Create a new graph
-    G = nx.Graph()
-
-    # Add nodes
-    G.add_nodes_from(positions.keys())
-    G.add_nodes_from(additional_positions.keys())
-
-    # Add edges to form a regular pentagon
-    pentagon_edges = [(0, 8), (1, 8), (1, 14), (14, 15), (15, 0)]
-    G.add_edges_from(pentagon_edges)
-
-    # Combine positions
-    positions.update(additional_positions)
-
-    C = nx.compose(G, pointed_star)
-    pos = {0: (1.0, 0.0),
-           1: (0.30901695, 0.95105657),
-           8: (0.3090170091047043, 0.22451397931316094),
-           14: (1.0100736353166142, 1.1654969519440987),
-           15: (1.427051022134677, 0.5877853014287399),
-           2: (-0.80901706, 0.58778526),
-           3: (-0.809017, -0.58778532),
-           4: (0.3090171, -0.95105651),
-           7: (-0.11803401806840924, 0.36327126674823906),
-           8: (0.3090170091047043, 0.22451397931316094),
-           10: (0.30901704428157445, -0.22451399804788014),
-           11: (-0.11803392502284099, -0.36327128532288977),
-           13: (-0.3819660075375347, 6.783278650309795e-09)}
-    nx.draw(C,pos = pos, with_labels=True, node_color='skyblue', node_size=500, font_size=12)
-    positions2 = {
-         0: (1.0, 0.0),
-         10: (0.30901704428157445, -0.22451399804788014),
-         4: (0.3090171, -0.95105651),
-    }
-    x140_transform = positions[14][0] - positions[0][0]
-    y140_transform = positions[14][1] - positions[0][1]
-    y1415_transform = positions[14][1] - positions[15][1]
-    x1415_transform = positions[14][0] - positions[15][0]
-
-    # Calculate the coordinates of node 14 to form a regular pentagon
-    x_16 = pos_star[0][0] - x1415_transform
-    y_16 = pos_star[0][1] - y1415_transform
-
-    x_17 = pos_star[0][0] - x140_transform
-    y_17 = pos_star[0][1] - y140_transform
-
-    additional_positions = {
-         16: (x_16, y_16),  # Adjust y-coordinate to be above other nodes
-         17: (x_17, y_17),  # Adjust y-coordinate to be above other nodes
-    }
-
-    # Create a new graph
-    G2 = nx.Graph()
-
-    # Add nodes
-    G2.add_nodes_from(positions2.keys())
-    G2.add_nodes_from(additional_positions.keys())
-
-    # Add edges to form a regular pentagon
-    pentagon_edges = [(0, 10), (10, 4), (4, 17), (17, 16), (16, 0)]
-    G2.add_edges_from(pentagon_edges)
-
-    # Combine positions
-    positions2.update(additional_positions)
-
-    D = nx.compose(G2, C)
-    pos = {0: (1.0, 0.0),
-            1: (0.30901695, 0.95105657),
-            8: (0.3090170091047043, 0.22451397931316094),
-            14: (1.0100736353166142, 1.1654969519440987),
-            15: (1.427051022134677, 0.5877853014287399),
-            2: (-0.80901706, 0.58778526),
-            3: (-0.809017, -0.58778532),
-            4: (0.3090171, -0.95105651),
-            7: (-0.11803401806840924, 0.36327126674823906),
-            8: (0.3090170091047043, 0.22451397931316094),
-            10: (0.30901704428157445, -0.22451399804788014),
-            11: (-0.11803392502284099, -0.36327128532288977),
-            13: (-0.3819660075375347, 6.783278650309795e-09),
-            16: (1.4169773868180628, -0.5777116505153589),
-            17: (0.9899263646833858, -1.1654969519440987)}
-
-    nx.draw(D, pos=pos, with_labels=True, node_color='skyblue', node_size=500, font_size=12)
-    return plt.show()
-
-pointed_star_with_2_pentagons()
-
-
-
-def better_code():
-    # Number of outer nodes (points of the star)
-    n = 5
-
-    # Create a complete graph for the outer nodes
-    outer_star = nx.complete_graph(n)
-
-    # Create a star graph for the central hub
-    hub = nx.star_graph([0])
-
-    # Combine the hub and the outer nodes
-    pointed_star = nx.compose(hub, outer_star)
-
-    # Set positions for the nodes in the outer star
-    outer_positions = nx.circular_layout(outer_star)
-
-    # Set positions for the central hub
-    hub_position = {0: (0, 0)}
-
-    # Merge positions
-    positions = {**hub_position, **outer_positions}
-
-    # Set the positions in the graph
-    nx.set_node_attributes(pointed_star, positions, 'pos')
-
-    # List to store intersection nodes to be added
-    intersection_nodes = []
-
-    # Iterate through all pairs of adjacent edges to find intersection points
-    for u, v in pointed_star.edges():
-        for x, y in pointed_star.edges():
-            if (u, v) != (x, y):
-                # Create LineString objects from the edge endpoints
-                line1 = LineString([pointed_star.nodes[u]['pos'], pointed_star.nodes[v]['pos']])
-                line2 = LineString([pointed_star.nodes[x]['pos'], pointed_star.nodes[y]['pos']])
-                # Check if the two edges intersect
-                intersection = line1.intersection(line2)
-                if intersection.is_empty:
-                    continue
-                # If intersection is a point, add it to the list
-                if intersection.geom_type == 'Point':
-                    intersection_nodes.append((intersection.x, intersection.y))
-
-    # Add intersection nodes to the graph
-    for node in intersection_nodes:
-        pointed_star.add_node(node, pos=node)
-
-    # Relabel nodes
-    nx.relabel_nodes(pointed_star, {(0.3090169521873281, 0.9510565683560541): 5}, copy=False)
-    nx.relabel_nodes(pointed_star, {(-0.8090170564954595, 0.587785261505403): 6}, copy=False)
-    nx.relabel_nodes(pointed_star, {(-0.11803401806840924, 0.36327126674823906): 7}, copy=False)
-    nx.relabel_nodes(pointed_star, {(0.3090170091047043, 0.22451397931316094): 8}, copy=False)
-    nx.relabel_nodes(pointed_star, {(-0.809016996890813, -0.5877853211100496): 9}, copy=False)
-    nx.relabel_nodes(pointed_star, {(0.30901704428157445, -0.22451399804788014): 10}, copy=False)
-    nx.relabel_nodes(pointed_star, {(-0.11803392502284099, -0.36327128532288977): 11}, copy=False)
-    nx.relabel_nodes(pointed_star, {(0.3090171011989445, -0.9510565087514076): 12}, copy=False)
-    nx.relabel_nodes(pointed_star, {(-0.3819660075375347, 6.783278650309795e-09): 13}, copy=False)
-
-    # Remove nodes and edges
-    nodes_to_remove = [9, 5, 12, 6, (1.0, 0.0)]
-    edges_to_remove = [(1, 2), (1, 0), (0, 4), (4, 3), (3, 2), (1, 4), (3, 1), (4, 2), (1, 9), (3, 1), (2, 0), (1, 4),
-                       (9, 0), (0, 3)]
-    pointed_star.remove_nodes_from(nodes_to_remove)
-    pointed_star.remove_edges_from(edges_to_remove)
-
-    pointed_star.add_edge(2, 7)
-    pointed_star.add_edge(2, 13)
-    pointed_star.add_edge(1, 7)
-    pointed_star.add_edge(1, 8)
-    pointed_star.add_edge(8, 0)
-    pointed_star.add_edge(0, 10)
-    pointed_star.add_edge(10, 4)
-    pointed_star.add_edge(4, 11)
-    pointed_star.add_edge(11, 3)
-    pointed_star.add_edge(3, 13)
-
-    nx.relabel_nodes(pointed_star,mapping={7:5,8:6,10:7,11:8,13:9})
-    # Print edges with the nodes they are connecting
-    print("Edges:")
-    for edge in pointed_star.edges():
-        print(f"Edge: {edge}, Nodes: {edge[0]}, {edge[1]}")
-
-    # Visualize the graph
-    plt.figure(figsize=(8, 8))
-    pos_star = nx.get_node_attributes(pointed_star, 'pos')
-    # nx.draw_networkx(pointed_star, pos_star, with_labels=True, node_color='skyblue', node_size=1000, font_size=12)
-    # nx.draw_networkx_edges(pointed_star, pos_star, edge_color='black')  # Draw edges
-    # plt.title("Pointed Star Lattice with Nodes at Intersections")
-    # return plt.show()
-
-    x18 = pos_star[1][0]-pos_star[8][0]
-    y18 = pos_star[1][1]-pos_star[8][1]
-    x80 = pos_star[8][0] - pos_star[0][0]
-    y80 = pos_star[8][1] - pos_star[0][1]
-    x313 = pos_star[13][0]-pos_star[3][0]
-    y313 = pos_star[13][1]-pos_star[3][1]
-    x311 = pos_star[3][0]-pos_star[11][0]
-    y311 = pos_star[11][1]-pos_star[3][1]
-    x411 = pos_star[11][0] - pos_star[4][0]
-    y411 = pos_star[11][1] - pos_star[4][1]
-
-    additional_positions = {
-        14: (pos_star[1][0]+x313-(.5*x80),pos_star[1][1]+y313-(y80)),
-        15: (pos_star[0][0]+x313,pos_star[0][1]+y313),
-        16: (pos_star[0][0]+x18,pos_star[0][1]-y18),
-        17: (pos_star[4][0]+x80,pos_star[4][1]+y80),
-    }
-    pentagon_edges = [(0, 15), (15, 14), (14, 1), (4, 17), (17, 16), (16, 0)]
-    pointed_star.add_edges_from(pentagon_edges)
-
-    pos_star.update(additional_positions)
-    nx.draw(pointed_star,pos_star, with_labels=True, node_color='skyblue', node_size=50, font_size=12)
-    plt.show()
-better_code()
+
+
+# import pygame
+# Create the triangular lattice graph (3 rows, 5 columns)
+
+
+class Board:
+    def __init__(self):
+        self.style_dict = {'player1': 'solid', 'player2': 'solid', 'unplayed': 'dashed', 'unplayable': 'solid'}
+        self.color_dict = {'player1': 'red', 'player2': 'lightskyblue', 'unplayed': 'black', 'unplayable': 'white'}
+        self.label_edge_dict = {'player1': False, 'player2': False, 'unplayed': True, 'unplayable': False}
+        self.dim = self.select_dimension()
+        self.edge_number_dict = {}
+        self.edge_number_dict_r = {}
+        self.board, self.positions, self.circle, self.triangle, self.square, self.initial_nodes, self.edge_numbers = self.create_base_board()
+
+    plt.clf()
+
+    def legal_move_edges(self, default_board):
+        """
+        This function calculates the valid moves for the game
+        :param default_board: dummy variable
+        :return:
+        """
+        legal_moves = []
+        for edge in nx.edges(default_board if default_board else self.board):
+            if default_board[edge[0]][edge[1]]['EdgeType'] == 'unplayed':
+                legal_moves.append(edge)
+        return legal_moves
+
+    def select_dimension(self):
+        """
+        Asks user for dimension n for nxn board
+        :return:
+        """
+        option = (input(f'Please enter the integer (n) dimension of the (nxn) grid you want from 3 to 15.'))
+        try:
+            return [int(option) + 1, int(option) + 1]
+        except ValueError:
+            print(f'You have chosen an invalid input.'
+                  f'Please enter the number corresponding to the size of game you want to play. \ni.e., 1, 2, or 3.')
+            return self.select_dimension()
+
+    def create_base_board(self):
+        """
+        This function creates the original game board which will be updated throughout the game in other functions.
+        This is only responsible for the original board (before any gameplay)
+        :return: board
+        """
+        regular_lattice = nx.grid_2d_graph(self.dim[0], self.dim[1])
+        shapes = ['o', '^', 's']
+        total_cells = self.dim[0] * self.dim[1]
+        circle_num = int(0.2 * total_cells)
+        triangle_num = int(0.3 * total_cells)
+        square_num = total_cells - circle_num - triangle_num
+        pattern = shapes[0] * (circle_num) + shapes[1] * (triangle_num) + shapes[2] * (square_num)
+        pattern = list(pattern)
+        random.shuffle(pattern)
+        pos = {(x, y): (y, -x) for x, y in regular_lattice.nodes()}
+        nx.set_node_attributes(regular_lattice, 'game', name='NodeType')
+        nx.set_node_attributes(regular_lattice, 'o', name='NodeShape')
+        nx.set_edge_attributes(regular_lattice, 'unplayed', name='EdgeType')
+        initial_nodes = list(copy.copy(regular_lattice.nodes()))
+        i = 0
+        circle = []
+        triangle = []
+        square = []
+        for x, y in initial_nodes:
+            if ((x, y + 1) in initial_nodes) and \
+                    ((x + 1, y + 1) in initial_nodes) and \
+                    ((x + 1, y) in initial_nodes) and \
+                    i < len(pattern):
+                regular_lattice.add_node((x + 0.5, y + 0.5), NodeType='shape', NodeShape=list(pattern)[i])
+                # print(pattern[i])
+                if pattern[i] == 'o':
+                    circle.append((x + 0.5, y + 0.5))
+                elif pattern[i] == '^':
+                    triangle.append((x + 0.5, y + 0.5))
+                else:
+                    square.append((x + 0.5, y + 0.5))
+                regular_lattice.add_edge((x + 0.5, y + 0.5), (x, y), EdgeType='unplayable')
+                regular_lattice.add_edge((x + 0.5, y + 0.5), (x, y + 1), EdgeType='unplayable')
+                regular_lattice.add_edge((x + 0.5, y + 0.5), (x + 1, y + 1), EdgeType='unplayable')
+                regular_lattice.add_edge((x + 0.5, y + 0.5), (x + 1, y), EdgeType='unplayable')
+                pos[(x + 0.5, y + 0.5)] = ((y + 0.5), -(x + 0.5))
+                i = i + 1
+        # for node in regular_lattice.nodes():
+        # print(f"for node {node} NodeType is: {regular_lattice.nodes[node]['NodeType']}")
+        i = 0
+        self.edge_numbers = self.legal_move_edges(regular_lattice)
+        # print(self.edge_numbers)
+        for edge in regular_lattice.edges():
+            if edge in self.edge_numbers:
+                nx.set_edge_attributes(regular_lattice, i, name='EdgeNumber')
+                self.edge_number_dict[edge] = i
+                self.edge_number_dict_r[i] = edge
+                i += 1
+                # print(f"for edge connecting {edge}\n\tEdgeType is: {regular_lattice[edge[0]][edge[1]]['EdgeType']}"
+                #       f"\n\tEdgeNumber is: {regular_lattice[edge[0]][edge[1]]['EdgeNumber']}")
+            # else:
+            #     print(f"for edge connecting {edge}\n\tEdgeType is: {regular_lattice[edge[0]][edge[1]]['EdgeType']}")
+
+        EdgeType = nx.get_edge_attributes(regular_lattice, 'EdgeType').values()
+        NodeShape = list(nx.get_node_attributes(regular_lattice, 'NodeShape').values())
+        # print(NodeShape)
+        nx.draw_networkx(regular_lattice, pos=pos, with_labels=False, node_color='darkgrey', node_size=50,
+                         edge_color=[self.color_dict[Edge] for Edge in EdgeType], nodelist=initial_nodes,
+                         node_shape='o',
+                         font_size=5, style=[self.style_dict[Edge] for Edge in EdgeType])
+        nx.draw_networkx_edge_labels(regular_lattice, pos, edge_labels=self.edge_number_dict,
+                                     font_color='black',
+                                     font_size=([12 if self.dim[0] < 6 else 8 if self.dim[0] <= 9 else 5][0]),
+                                     font_weight='bold', rotate=0)
+        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=circle, node_shape='o', label=False, node_color='purple',
+                               node_size=[200 if self.dim[0] < 6 else 75 if self.dim[0] > 9 else 100])
+        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=triangle, node_shape='^', label=False, node_color='green',
+                               node_size=[200 if self.dim[0] < 6 else 75 if self.dim[0] > 9 else 100])
+        nx.draw_networkx_nodes(regular_lattice, pos, nodelist=square, node_shape='s', label=False, node_color='navy',
+                               node_size=[200 if self.dim[0] < 6 else 75 if self.dim[0] > 9 else 100])
+        plt.title("Regular 2d")
+        plt.figure(dpi=500)
+        plt.show()
+        return regular_lattice, pos, circle, triangle, square, initial_nodes, self.edge_numbers
+
+    def show_board(self, scores: dict, player):
+        """
+        This function is the board updating function. It creates a new board after every move.
+        :param scores: Current player scores
+        :param player: current player
+        :return:
+        """
+        # EdgeType = nx.get_edge_attributes(self.board, 'EdgeType').values()
+        # nx.draw_networkx(self.board, pos=self.positions, with_labels=True, node_color='darkgrey', node_size=250,
+        #                  edge_color=[self.color_dict[Edge] for Edge in EdgeType],
+        #                  font_size=5, style=[self.style_dict[Edge] for Edge in EdgeType])
+        # plt.title("Regular 2d")
+        # plt.figure(dpi=500)
+        # plt.show()
+        EdgeType = nx.get_edge_attributes(self.board, 'EdgeType').values()
+        NodeShape = list(nx.get_node_attributes(self.board, 'NodeShape').values())
+        # print(NodeShape)
+        nx.draw_networkx(self.board, pos=self.positions, with_labels=False, node_color='darkgrey', node_size=50,
+                         edge_color=[self.color_dict[Edge] for Edge in EdgeType],
+                         nodelist=self.initial_nodes, node_shape='o',
+                         font_size=5, style=[self.style_dict[Edge] for Edge in EdgeType])
+        nx.draw_networkx_edge_labels(self.board, self.positions,
+                                     edge_labels={edge: self.edge_number_dict[edge] for edge in self.edge_numbers if
+                                                  self.label_edge_dict[self.board[edge[0]][edge[1]]['EdgeType']]},
+                                     font_color='black',
+                                     font_size=([12 if self.dim[0] < 6 else 8 if self.dim[0] <= 9 else 5][0]),
+                                     font_weight='bold', rotate=0)
+        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.circle, label=False, node_shape='o',
+                               node_color='purple',
+                               node_size=[200 if self.dim[0] < 6 else 75 if self.dim[0] > 9 else 100])
+        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.triangle, label=False, node_shape='^',
+                               node_color='green',
+                               node_size=[200 if self.dim[0] < 6 else 75 if self.dim[0] > 9 else 100])
+        nx.draw_networkx_nodes(self.board, self.positions, nodelist=self.square, label=False, node_shape='s',
+                               node_color='navy',
+                               node_size=[200 if self.dim[0] < 6 else 75 if self.dim[0] > 9 else 100])
+        plt.title(
+            f"Scores: Player 1 (red) has {scores['player1']} points and Player 2(blue) has {scores['player2']} points\nCurrent player: {player}")
+        plt.figure(dpi=500)
+        plt.show()
+
+
+class Play:
+    def __init__(self, board=Board()):
+        self.board = board
+        self.score_tracker = {}
+        self.player_scores = {'player1': {'circle': 0, 'triangle': 0, 'square': 0},
+                              'player2': {'circle': 0, 'triangle': 0, 'square': 0}}
+        self.players = ['player1', 'player2']
+        self.current_player = self.players[0]
+        self.box_counts = {player: 0 for player in self.players}
+        self.start = self.play()
+        self.mode = self.opponent()
+        self.difficulty = None
+
+    def ask_for_selection(self, player, legal_moves):
+        """
+        This function asks the user for the move they'd like to play
+        :param player: current player
+        :param legal_moves: the valid moves at the turn when this is called
+        :return:
+        """
+        # print(f'The available moves are as follows:')
+        # for edge in self.board.edge_number_dict.keys():
+        # if edge in legal_moves:
+        #     print(f'{self.board.edge_number_dict[edge]}')
+
+        selection = int(input('Make a move. Enter the edge number of the move you want to play: '))
+        return self.board.edge_number_dict_r[selection]
+        # Todo: If input > max(self.board.edge_number_dict_r[selection]) -> try again
+
+    def selection(self, player):
+        """
+        This function makes the move that was specified in self.ask_for_selection(). If an edge is selected that has
+        already been played, the user will be prompted to pick a new edge.
+        :param player: current player
+        :return:
+        """
+        if self.mode == 'H' or player == 'player1':
+            still_legal_moves = self.board.legal_move_edges(self.board.board)
+
+            move = self.ask_for_selection(player, still_legal_moves)
+            try:
+                if move in still_legal_moves:
+                    self.board.board[move[0]][move[1]]['EdgeType'] = player
+                else:
+                    print("\nThat edge has already been played! Try again!")
+                    self.selection(player)
+            except KeyError or ValueError:
+                print("\nThat edge doesn't exist! Try again!")
+                self.selection(player)
+                # TODO: Needs to be fixed
+            # return self.advanced_box(player)
+        elif self.mode == 'C' and player == 'player2':
+            move, _ = self.AI.MiniMax(self.board.board, self.difficulty,
+                                      moves=self.board.legal_move_edges(self.board.board))
+            print(f'Ai move: {move}')
+            self.board.board[move[0]][move[1]]['EdgeType'] = player
+        return self.advanced_box(player)
+
+    def neighbors_boxed(self, neighbors):
+        """
+        This function determines if a box has been made
+        :param neighbors: edge neighbors
+        :return: bool
+        """
+        valid_connection_counter = 0
+        neighbors = list(neighbors)
+        # print(neighbors)
+        # try:
+        #     if self.board.board[neighbors[0]][neighbors[1]]['EdgeType'] in ['player1', 'player2']:
+        #         valid_connection_counter += 1
+        # except KeyError:
+        #     pass
+        # try:
+        #     if self.board.board[neighbors[1]][neighbors[2]]['EdgeType'] in ['player1', 'player2']:
+        #         valid_connection_counter += 1
+        # except KeyError:
+        #     pass
+        # try:
+        #     if self.board.board[neighbors[2]][neighbors[3]]['EdgeType'] in ['player1', 'player2']:
+        #         valid_connection_counter += 1
+        # except KeyError:
+        #     pass
+        # try:
+        #     if self.board.board[neighbors[0]][neighbors[3]]['EdgeType'] in ['player1', 'player2']:
+        #         valid_connection_counter += 1
+        # except KeyError:
+        #     pass
+        # try:
+        #     if self.board.board[neighbors[0]][neighbors[2]]['EdgeType'] in ['player1', 'player2']:
+        #         valid_connection_counter += 1
+        # except KeyError:
+        #     pass
+        # try:
+        #     if self.board.board[neighbors[1]][neighbors[3]]['EdgeType'] in ['player1', 'player2']:
+        #         valid_connection_counter += 1
+        # except KeyError:
+        #     pass
+        try:
+            for pair in [(0, 1), (1, 2), (2, 3), (0, 3), (0, 2), (1, 3)]:
+                if self.board.board[neighbors[pair[0]]][neighbors[pair[1]]]['EdgeType'] in ['player1', 'player2']:
+                    valid_connection_counter += 1
+        except KeyError:
+            pass
+
+        if valid_connection_counter == 4:
+            return True
+        else:
+            return False
+
+    def advanced_box(self, player):
+        """
+        Determines what shape has been boxed in.
+        :param player: current player
+        :return:
+        """
+        boxed = False
+        # for node in self.board.circle:
+        #     neighbours = nx.neighbors(self.board.board, node)
+        #     if node in self.score_tracker.keys():
+        #         pass
+        #     else:
+        #         if self.neighbors_boxed(neighbours):
+        #             self.score_tracker[node] = 'circle'
+        #             self.player_scores[player]['circle'] += 1
+        #             boxed = True
+        #
+        # for node in self.board.triangle:
+        #     neighbours = nx.neighbors(self.board.board, node)
+        #     if node in self.score_tracker.keys():
+        #         pass
+        #     else:
+        #         if self.neighbors_boxed(neighbours):
+        #             self.score_tracker[node] = 'triangle'
+        #             self.player_scores[player]['triangle'] += 1
+        #             boxed = True
+        #
+        # for node in self.board.square:
+        #     neighbours = nx.neighbors(self.board.board, node)
+        #     if node in self.score_tracker.keys():
+        #         pass
+        #     else:
+        #         if self.neighbors_boxed(neighbours):
+        #             self.score_tracker[node] = 'square'
+        #             self.player_scores[player]['square'] += 1
+        #             boxed = True
+        shape_functions = {'triangle': self.board.triangle, 'square': self.board.square, 'circle': self.board.circle}
+        for shape in shape_functions.keys():
+            for node in shape_functions[shape]:
+                neighbours = nx.neighbors(self.board.board, node)
+                if node in self.score_tracker.keys():
+                    pass
+                else:
+                    if self.neighbors_boxed(neighbours):
+                        self.score_tracker[node] = shape
+                        self.player_scores[player][shape] += 1
+                        boxed = True
+        return boxed
+
+    def redraw_map(self, nodes, player, shape):
+        """
+        This function remaps the board by assigning a box to a player once it has been captured
+        :param nodes:
+        :param player:
+        :param shape:
+        :return:
+        """
+        for node in nodes:
+            self.score_tracker[node] = shape
+            neighbors = list(nx.neighbors(self.board.board, node))
+            try:
+                for pair in [(0, 1), (1, 2), (2, 3), (0, 3), (0, 2), (1, 3)]:
+                    self.board.board[neighbors[pair[0]]][neighbors[pair[1]]]['EdgeType'] = player
+            except KeyError:
+                pass
+            # try:
+            #     self.board.board[neighbors[1]][neighbors[2]]['EdgeType'] = player
+            # except KeyError:
+            #     pass
+            # try:
+            #     self.board.board[neighbors[2]][neighbors[3]]['EdgeType'] = player
+            # except KeyError:
+            #     pass
+            # try:
+            #     self.board.board[neighbors[0]][neighbors[3]]['EdgeType'] = player
+            # except KeyError:
+            #     pass
+            # try:
+            #     self.board.board[neighbors[0]][neighbors[2]]['EdgeType'] = player
+            # except KeyError:
+            #     pass
+            # try:
+            #     self.board.board[neighbors[1]][neighbors[3]]['EdgeType'] = player
+            # except KeyError:
+            #     pass
+
+    def capturing_shape(self, shape, player):
+        """
+        This function calls self.redraw_map() and self.player_scores()
+        :param shape:
+        :param player:
+        :return:
+        """
+        shape_functions = {'triangle': self.board.triangle, 'square': self.board.square, 'circle': self.board.circle}
+        self.redraw_map(shape_functions[shape], player, shape)
+        self.player_scores[self.players[int(not bool(self.players.index(player)))]][shape] = 0
+        # if shape == 'circle':
+        #     self.redraw_map(self.board.circle, player, shape)
+        #     self.player_scores[self.players[int(not bool(self.players.index(player)))]]['circle'] = 0
+        # if shape == 'triangle':
+        #     self.redraw_map(self.board.triangle, player, shape)
+        #     self.player_scores[self.players[int(not bool(self.players.index(player)))]]['triangle'] = 0
+        # if shape == 'square':
+        #     self.redraw_map(self.board.square, player, shape)
+        #     self.player_scores[self.players[int(not bool(self.players.index(player)))]]['square'] = 0
+        print(f'{player} captured {shape}')
+
+    def score(self, player):
+        total_circle = len(self.board.circle)
+        total_triangle = len(self.board.triangle)
+        total_square = len(self.board.square)
+        player_1_score = 0
+        player_2_score = 0
+        captured = False
+        if self.player_scores['player1']['circle'] >= total_circle / 2 and self.player_scores['player1'][
+            'circle'] != total_circle:
+            player_1_score += total_circle * 5
+            self.player_scores['player1']['circle'] = total_circle
+            self.capturing_shape('circle', player)
+            captured = True
+        else:
+            player_1_score += self.player_scores['player1']['circle'] * 5
+        if self.player_scores['player1']['triangle'] >= total_triangle / 2 and self.player_scores['player1'][
+            'triangle'] != total_triangle:
+            player_1_score += total_triangle * 3
+            self.player_scores['player1']['triangle'] = total_triangle
+            self.capturing_shape('triangle', player)
+            captured = True
+        else:
+            player_1_score += self.player_scores['player1']['triangle'] * 3
+        if self.player_scores['player1']['square'] >= total_square / 2 and self.player_scores['player1'][
+            'square'] != total_square:
+            self.player_scores['player1']['square'] = total_square
+            self.capturing_shape('square', player)
+            captured = True
+            player_1_score += total_square * 2
+        else:
+            player_1_score += self.player_scores['player1']['square'] * 2
+
+        if self.player_scores['player2']['circle'] >= total_circle / 2 and self.player_scores['player2'][
+            'circle'] != total_circle:
+            player_2_score += total_circle * 5
+            self.player_scores['player2']['circle'] = total_circle
+            self.capturing_shape('circle', player)
+            captured = True
+        else:
+            player_2_score += self.player_scores['player2']['circle'] * 5
+
+        if self.player_scores['player2']['triangle'] >= total_triangle / 2 and self.player_scores['player2'][
+            'triangle'] != total_triangle:
+            player_2_score += total_triangle * 3
+            self.player_scores['player2']['triangle'] = total_triangle
+            self.capturing_shape('triangle', player)
+            captured = True
+        else:
+            player_2_score += self.player_scores['player2']['triangle'] * 3
+
+        if self.player_scores['player2']['square'] >= total_square / 2 and self.player_scores['player2'][
+            'square'] != total_square:
+            player_2_score += total_square * 2
+            self.player_scores['player2']['square'] = total_square
+            self.capturing_shape('square', player)
+            captured = True
+        else:
+            player_2_score += self.player_scores['player2']['square'] * 2
+        print(f"player1: {player_1_score},  player2: {player_2_score}")
+        return {'player1': player_1_score, 'player2': player_2_score}, captured
+
+    def opponent(self):
+        opp = (input('To play against the computer, enter C. To play against a human opponent, type H.')).upper()
+        try:
+            if opp == 'C':
+                self.mode = 'C'
+                self.AI = AI_player()
+                self.difficulty = self.AI.depth
+
+            elif opp == 'H':
+                self.mode = 'H'
+        except ValueError:
+            opp = self.opponent()
+        return opp
+
+    def play(self):
+        self.opponent()
+        players = ['player1', 'player2']
+        player = 0
+        while len(self.board.legal_move_edges(self.board.board)) > 0:
+            box_added = self.selection(players[player])
+            unstable = True
+            while unstable:
+                scores, unstable = self.score(players[player])
+                print(self.player_scores)
+
+            if not box_added:
+                if player == 0:
+                    player = 1
+                else:
+                    player = 0
+            else:
+                print('You won a box!!!')
+            self.board.show_board(scores, players[player])
+        print(f'{"Player 1" if scores["player1"] > scores["player2"] else "Player 2"} wins!')
+        return 0
+
+
+class AI_player:
+    def __init__(self):
+        # self.score = player_scores
+        self.depth = self.difficulty()
+
+    def difficulty(self):
+        diff = input("Type Easy (0), Medium (1), or Hard (2) for computer skill level:")
+        try:
+            diff = int(diff)
+        except TypeError:
+            diff = diff.lower()
+        try:
+            if diff == 'easy' or diff == 0:
+                depth = 3
+            elif diff == 'medium' or diff == 1:
+                depth = 4
+            elif diff == 'hard' or diff == 2:
+                depth = 5
+            return depth
+        except ValueError:
+            return self.difficulty()
+
+    def alpha_beta(self):
+        return self.depth
+
+    def neighbors_boxed(self, board: Board, neighbors):
+        """
+        This function determines if a box has been made
+        :param board:
+        :param neighbors: edge neighbors
+        :return: bool
+        """
+        valid_connection_counter = 0
+        neighbors = list(neighbors)
+
+        try:
+            for pair in [(0, 1), (1, 2), (2, 3), (0, 3), (0, 2), (1, 3)]:
+                if board.board[neighbors[pair[0]]][neighbors[pair[1]]]['EdgeType'] in ['player1', 'player2']:
+                    valid_connection_counter += 1
+        except KeyError:
+            pass
+
+        if valid_connection_counter == 4:
+            return True
+        else:
+            return False
+
+    def advanced_box_tracker(self, board: Board, length=True):
+        """
+        Determines what shape has been boxed in.
+        :param length:
+        :param board:
+        :param player: current player
+        :return:
+        """
+
+        boxed = []
+        shape_functions = {'triangle': board.triangle, 'square': board.square, 'circle': board.circle}
+        for shape in shape_functions.keys():
+            for node in shape_functions[shape]:
+                neighbours = nx.neighbors(board.board, node)
+                if self.neighbors_boxed(neighbours, board):
+                    boxed.append(node)
+        if length:
+            return len(boxed)
+        else:
+            return boxed
+
+    def MiniMax(self, board: Board, depth_play, moves: list, played_moves=[]):
+        # todo: currently the program runs on an assumption of alternating turn, add functionality to check for and
+        #  accommodate the possibility of repeating turns.
+        # find the minimum of the scores
+        # find the maximum
+
+        player = 'player2'
+        maximum = -20000
+        played_moves.append('')
+        best_move = None
+        # moves_copy = moves.copy()
+        # print(f'minimax: depth_play: {depth_play}, moves: {moves}')
+        box_count = self.advanced_box_tracker(board)
+        boxes =
+        if depth_play < 2 or len(moves) == 1:
+            for move in moves:
+                played_moves[-1] = move
+                move_heuristic = self.heuristic(board, player, played_moves)
+                if move_heuristic > maximum:
+                    maximum = move_heuristic
+                    best_move = move
+            return best_move
+        else:
+            for move in moves:
+                board_copy = copy.copy(board)
+                board_copy.board[move[0]][move[1]]['EdgeType'] = player
+                moves_copy = moves.copy()
+                played_moves[-1] = move
+                moves_copy.remove(move)
+                if box_count == self.advanced_box_tracker(board_copy):
+                    _, move_heuristic = self.Minimum(board, depth_play - 1, moves_copy, played_moves, board_copy)
+                else:
+                    _, move_heuristic = self.Maximum(board, depth_play - 1, moves_copy, played_moves, board_copy)
+                if move_heuristic > maximum:
+                    maximum = move_heuristic
+                    best_move = move, maximum
+            return best_move
+
+    def Minimum(self, board: Board, depth_play, moves: list, played_moves: list, board_played: Board):
+        player = 'player1'
+        minimum = 20000
+        played_moves.append('')
+        best_move = moves[0]
+        box_count = self.advanced_box_tracker(board_played)
+        # moves_copy = moves.copy()
+        # print(f'Minimum: depth_play: {depth_play}, moves: {moves}')
+        if depth_play < 2 or len(moves) == 1:
+            for move in moves:
+                played_moves[-1] = move
+                move_heuristic = self.heuristic(board, player, played_moves)
+                if move_heuristic < minimum:
+                    minimum = move_heuristic
+                    best_move = move
+            return best_move, minimum
+        else:
+            for move in moves:
+                board_copy = copy.copy(board_played)
+                board_copy.board[move[0]][move[1]]['EdgeType'] = player
+                moves_copy = moves.copy()
+                played_moves[-1] = move
+                moves_copy.remove(move)
+                if box_count == self.advanced_box_tracker(board_copy):
+                    _, move_heuristic = self.Maximum(board, depth_play - 1, moves_copy, played_moves, board_copy)
+                else:
+                    _, move_heuristic = self.Minimum(board, depth_play - 1, moves_copy, played_moves, board_copy)
+                if move_heuristic < minimum:
+                    minimum = move_heuristic
+                    best_move = move, minimum
+            return best_move, minimum
+
+    def Maximum(self, board: Board, depth_play, moves: list, played_moves: list, board_played: Board):
+        player = 'player2'
+        maximum = -20000
+        played_moves.append('')
+        best_move = None
+        box_count = self.advanced_box_tracker(board_played)
+        # print(f'Maximum: depth_play: {depth_play}, moves: {moves}')
+        if depth_play < 2 or len(moves) == 1:
+            for move in moves:
+                played_moves[-1] = move
+                move_heuristic = self.heuristic(board, player, played_moves)
+                if move_heuristic > maximum:
+                    maximum = move_heuristic
+                    best_move = move
+            return best_move, maximum
+        else:
+            for move in moves:
+                board_copy = copy.copy(board_played)
+                board_copy.board[move[0]][move[1]]['EdgeType'] = player
+                moves_copy = moves.copy()
+                played_moves[-1] = move
+                moves_copy.remove(move)
+                if box_count == self.advanced_box_tracker(board_copy):
+                    _, move_heuristic = self.Minimum(board, depth_play - 1, moves_copy, played_moves, board_copy)
+                else:
+                    _, move_heuristic = self.Maximum(board, depth_play - 1, moves_copy, played_moves, board_copy)
+                if move_heuristic > maximum:
+                    maximum = move_heuristic
+                    best_move = move, maximum
+            return best_move, maximum
+
+    def heuristic_idea_test(self, board: Board, player, moves):
+        AI_play = Play(board)
+        # todo: modify the play method in the Play class like in the above class to start at a custom player and play a predefined moves
+        AI_play.play(moves)
+        AI_play.score()
+
+    def heuristic(self, board: Board, player, moves):
+        return 0
+        # return random.choice(list(range(-20, 20)))
+        board_copy = board.copy()
+        all_possible = [self.game.board.legal_move_edges()]
+        for move in all_possible:
+            board_copy = board.copy()
+            Play.selection(move)
+            return (-1 * self.score['player1']) + self.score['player2']
+
+
+Play()
+
+

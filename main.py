@@ -3,6 +3,7 @@ import random
 import networkx as nx
 import matplotlib.pyplot as plt
 #import pygame
+import tqdm
 # Create the triangular lattice graph (3 rows, 5 columns)
 
 
@@ -16,6 +17,7 @@ class Board:
         self.edge_number_dict_r = {}
         self.board, self.positions, self.circle, self.triangle, self.square, self.initial_nodes, self.edge_numbers = self.create_base_board()
     plt.clf()
+
     def legal_move_edges(self, default_board):
         """
         This function calculates the valid moves for the game
@@ -40,6 +42,7 @@ class Board:
             print(f'You have chosen an invalid input.'
                   f'Please enter the number corresponding to the size of game you want to play. \ni.e., 1, 2, or 3.')
             return self.select_dimension()
+
     def create_base_board(self):
         """
         This function creates the original game board which will be updated throughout the game in other functions.
@@ -59,7 +62,7 @@ class Board:
         nx.set_node_attributes(regular_lattice, 'game', name='NodeType')
         nx.set_node_attributes(regular_lattice, 'o', name='NodeShape')
         nx.set_edge_attributes(regular_lattice, 'unplayed', name='EdgeType')
-        initial_nodes = list(copy.copy(regular_lattice.nodes()))
+        initial_nodes = list(copy.deepcopy(regular_lattice.nodes()))
         i = 0
         circle = []
         triangle = []
@@ -130,7 +133,7 @@ class Board:
         """
         EdgeType = nx.get_edge_attributes(self.board, 'EdgeType').values()
         NodeShape = list(nx.get_node_attributes(self.board, 'NodeShape').values())
-        print([[Edge] for Edge in EdgeType])
+        #print(NodeShape)
         nx.draw_networkx(self.board, pos=self.positions, with_labels=False, node_color='darkgrey', node_size=50,
                          edge_color=[self.color_dict[Edge] for Edge in EdgeType],
                          nodelist=self.initial_nodes,node_shape='o',
@@ -206,9 +209,11 @@ class Play():
                 self.selection(player)
 
         elif self.mode == 'C' and player == 'player2':
-            move, _ = self.AI.MiniMax(self.board, self.difficulty,
+            move, _ = self.AI.MiniMax(copy.deepcopy(self.board), self.difficulty,
                                       moves=self.board.legal_move_edges(self.board.board))
             print(f'Ai move: {move}')
+            # self.board.show_board({'player1': 0,  'player2': 0}, player)
+            # input(f'')
             self.board.board[move[0]][move[1]]['EdgeType'] = player
         return self.advanced_box(player)
 
@@ -333,7 +338,7 @@ class Play():
             captured = True
         else:
             player_2_score += self.player_scores['player2']['square'] * 2
-        print(f"player1: {player_1_score},  player2: {player_2_score}")
+        #print(f"player1: {player_1_score},  player2: {player_2_score}")
         return {'player1': player_1_score,  'player2': player_2_score}, captured
 
     def opponent(self):
@@ -360,7 +365,7 @@ class Play():
                 unstable = True
                 while unstable:
                     scores, unstable = self.score(players[player])
-                    print(self.player_scores)
+                    #print(self.player_scores)
 
                 if not box_added:
                     if player == 0:
@@ -376,8 +381,7 @@ class Play():
             players = ['player1', 'player2']
             player = 1
             for move in moves:
-                print(move)
-                self.board.board[move[0]][move[1]]['EdgeType'] = player
+                self.board.board[move[0]][move[1]]['EdgeType'] = players[player]
                 box_added = self.advanced_box(players[player])
                 unstable = True
                 while unstable:
@@ -390,7 +394,9 @@ class Play():
                     else:
                         player = 0
                 else:
-                    print('You won a box!!!')
+                    pass
+                    #print('You won a box!!!')
+                #self.board.show_board(scores, players[player])
             # print(f'{"Player 1" if scores["player1"] > scores["player2"] else "Player 2"} wins!')
             return scores
 
@@ -398,7 +404,6 @@ class Play():
 class AI_player:
     def __init__(self):
         # self.score = player_scores
-
         self.depth = self.difficulty()
 
     def difficulty(self):
@@ -424,17 +429,63 @@ class AI_player:
     def alpha_beta(self):
         return self.depth
 
+    def neighbors_boxed(self, board: Board, neighbors):
+        """
+        This function determines if a box has been made
+        :param board:
+        :param neighbors: edge neighbors
+        :return: bool
+        """
+        valid_connection_counter = 0
+        neighbors = list(neighbors)
+
+        try:
+            for pair in [(0, 1), (1, 2), (2, 3), (0, 3), (0, 2), (1, 3)]:
+                if board.board[neighbors[pair[0]]][neighbors[pair[1]]]['EdgeType'] in ['player1', 'player2']:
+                    valid_connection_counter += 1
+        except KeyError:
+            pass
+
+        if valid_connection_counter == 4:
+            return True
+        else:
+            return False
+
+    def advanced_box_tracker(self, board: Board, length=True):
+        """
+        Determines what shape has been boxed in.
+        :param length:
+        :param board:
+        :param player: current player
+        :return:
+        """
+
+        boxed = []
+        shape_functions = {'triangle': board.triangle, 'square': board.square, 'circle': board.circle}
+        for shape in shape_functions.keys():
+            for node in shape_functions[shape]:
+                neighbours = nx.neighbors(board.board, node)
+                if self.neighbors_boxed(board, neighbours):
+                    boxed.append(node)
+        if length:
+            return len(boxed)
+        else:
+            return boxed
     def MiniMax(self, board: Board, depth_play, moves: list, played_moves=[]):
         # todo: currently the program runs on an assumption of alternating turn, add functionality to check for and
         #  accommodate the possibility of repeating turns.
         # find the minimum of the scores
         # find the maximum
+
         player = 'player2'
         maximum = -20000
         played_moves.append('')
         best_move = None
+        total = len(moves)
+        i = 0
         #moves_copy = moves.copy()
         #print(f'minimax: depth_play: {depth_play}, moves: {moves}')
+        box_count = self.advanced_box_tracker(board)
         if depth_play < 2 or len(moves) == 1:
             for move in moves:
                 played_moves[-1] = move
@@ -444,21 +495,28 @@ class AI_player:
                     best_move = move
             return best_move
         else:
-            for move in moves:
+            for move in tqdm.tqdm(moves, desc="Processing moves"):
+                #print(f'\n\n\nMoves: {moves}, count: {len(moves)}\n\n\n')
+                board_copy = copy.deepcopy(board)
+                board_copy.board[move[0]][move[1]]['EdgeType'] = player
                 moves_copy = moves.copy()
                 played_moves[-1] = move
                 moves_copy.remove(move)
-                _, move_heuristic = self.Minimum(board, depth_play-1, moves_copy, played_moves)
+                if box_count == self.advanced_box_tracker(board_copy):
+                    _, move_heuristic = self.Minimum(board, depth_play - 1, moves_copy, played_moves, board_copy)
+                else:
+                    _, move_heuristic = self.Maximum(board, depth_play - 1, moves_copy, played_moves, board_copy)
                 if move_heuristic > maximum:
                     maximum = move_heuristic
                     best_move = move, maximum
             return best_move
 
-    def Minimum(self, board: Board, depth_play, moves: list, played_moves: list):
+    def Minimum(self, board: Board, depth_play, moves: list, played_moves: list, board_played: Board):
         player = 'player1'
         minimum = 20000
         played_moves.append('')
         best_move = moves[0]
+        box_count = self.advanced_box_tracker(board_played)
         #moves_copy = moves.copy()
         #print(f'Minimum: depth_play: {depth_play}, moves: {moves}')
         if depth_play < 2 or len(moves) == 1:
@@ -471,20 +529,26 @@ class AI_player:
             return best_move, minimum
         else:
             for move in moves:
+                board_copy = copy.deepcopy(board_played)
+                board_copy.board[move[0]][move[1]]['EdgeType'] = player
                 moves_copy = moves.copy()
                 played_moves[-1] = move
                 moves_copy.remove(move)
-                _, move_heuristic = self.Maximum(board, depth_play-1, moves_copy, played_moves)
+                if box_count == self.advanced_box_tracker(board_copy):
+                    _, move_heuristic = self.Maximum(board, depth_play-1, moves_copy, played_moves, board_copy)
+                else:
+                    _, move_heuristic = self.Minimum(board, depth_play - 1, moves_copy, played_moves, board_copy)
                 if move_heuristic < minimum:
                     minimum = move_heuristic
                     best_move = move, minimum
             return best_move, minimum
 
-    def Maximum(self, board: Board, depth_play, moves: list, played_moves: list):
+    def Maximum(self, board: Board, depth_play, moves: list, played_moves: list, board_played: Board):
         player = 'player2'
         maximum = -20000
         played_moves.append('')
         best_move = None
+        box_count = self.advanced_box_tracker(board_played)
         #print(f'Maximum: depth_play: {depth_play}, moves: {moves}')
         if depth_play < 2 or len(moves) == 1:
             for move in moves:
@@ -495,21 +559,30 @@ class AI_player:
                     best_move = move
             return best_move, maximum
         else:
+
             for move in moves:
+                board_copy = copy.deepcopy(board_played)
+                board_copy.board[move[0]][move[1]]['EdgeType'] = player
                 moves_copy = moves.copy()
                 played_moves[-1] = move
                 moves_copy.remove(move)
-                _, move_heuristic = self.Minimum(board, depth_play-1, moves_copy, played_moves)
+                if box_count == self.advanced_box_tracker(board_copy):
+                    _, move_heuristic = self.Minimum(board, depth_play-1, moves_copy, played_moves, board_copy)
+                else:
+                    _, move_heuristic = self.Maximum(board, depth_play - 1, moves_copy, played_moves, board_copy)
                 if move_heuristic > maximum:
                     maximum = move_heuristic
                     best_move = move, maximum
             return best_move, maximum
 
     # def heuristic_idea_test(self, board: Board, player, moves):
-    #     todo: modify the play method in the Play class like in the above class to start at a custom player and play a predefined moves
+    #     AI_play = Play(board)
+    #     # todo: modify the play method in the Play class like in the above class to start at a custom player and play a predefined moves
+    #     AI_play.play(moves)
+    #     AI_play.score()
     def heuristic(self, board: Board, player, moves):
         play_AI = Play(board, opponent='C')
-        print(moves)
+        #print(moves)
         self.score = play_AI.play(moves)
         return self.score['player2'] - self.score['player1']
 
