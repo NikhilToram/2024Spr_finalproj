@@ -52,7 +52,7 @@ class Board:
         circle_num = int(0.2*total_cells)
         triangle_num = int(0.3*total_cells)
         square_num = total_cells-circle_num-triangle_num
-        pattern = shapes[0]*(circle_num) + shapes[1]*(triangle_num) + shapes[2]*(square_num)
+        pattern = (shapes[0] * circle_num) + (shapes[1] * triangle_num) + (shapes[2] * square_num)
         pattern = list(pattern)
         random.shuffle(pattern)
         pos = {(x, y): (y, -x) for x, y in regular_lattice.nodes()}
@@ -113,7 +113,12 @@ class Board:
         plt.title("Regular 2d")
         plt.figure(dpi=500)
         plt.show()
-        return regular_lattice, pos, circle, triangle, square, initial_nodes, self.edge_numbers
+
+        self.circle = circle
+        self.triangle = triangle
+        self.square = square
+
+        return regular_lattice, pos, self.circle, self.triangle, self.square, initial_nodes, self.edge_numbers,\
 
 
     def show_board(self, scores: dict, player):
@@ -125,7 +130,7 @@ class Board:
         """
         EdgeType = nx.get_edge_attributes(self.board, 'EdgeType').values()
         NodeShape = list(nx.get_node_attributes(self.board, 'NodeShape').values())
-        #print(NodeShape)
+        print([[Edge] for Edge in EdgeType])
         nx.draw_networkx(self.board, pos=self.positions, with_labels=False, node_color='darkgrey', node_size=50,
                          edge_color=[self.color_dict[Edge] for Edge in EdgeType],
                          nodelist=self.initial_nodes,node_shape='o',
@@ -146,7 +151,7 @@ class Board:
 
 
 class Play():
-    def __init__(self, board=Board(), opponent=False):
+    def __init__(self, board=Board(), opponent=None):
         self.board = board
         self.score_tracker = {}
         self.player_scores = {'player1': {'circle': 0, 'triangle': 0, 'square': 0},
@@ -154,7 +159,11 @@ class Play():
         self.players = ['player1', 'player2']
         self.current_player = self.players[0]
         self.box_counts = {player: 0 for player in self.players}
-        if opponent == False:
+        # self.circle = self.board.circle
+        # self.triangle = self.board.triangle
+        # self.square = self.board.square
+
+        if opponent == None:
             self.mode = self.opponent()
             self.start = self.play()
         else:
@@ -170,8 +179,9 @@ class Play():
         :return:
         """
         selection = int(input('Make a move. Enter the edge number of the move you want to play: '))
-        if selection > ((self.board.dim[0]*self.board.dim[1])-1):
-            selection = int(input("That move doesn't exist on this board. Try Again!"))
+        if selection > ((((self.board.dim[0])*(self.board.dim[1]-1))*2)-1):
+            while selection > ((((self.board.dim[0])*(self.board.dim[1]-1))*2)-1):
+                selection = int(input("That move doesn't exist on this board. Try Again!"))
         return self.board.edge_number_dict_r[selection]
 
     def selection(self, player):
@@ -191,12 +201,12 @@ class Play():
                 else:
                     print("\nThat edge has already been played! Try again!")
                     self.selection(player)
-            except KeyError or ValueError:
+            except KeyError:
                 print("\nThat edge doesn't exist! Try again!")
                 self.selection(player)
 
         elif self.mode == 'C' and player == 'player2':
-            move, _ = self.AI.MiniMax(self.board.board, self.difficulty,
+            move, _ = self.AI.MiniMax(self.board, self.difficulty,
                                       moves=self.board.legal_move_edges(self.board.board))
             print(f'Ai move: {move}')
             self.board.board[move[0]][move[1]]['EdgeType'] = player
@@ -366,12 +376,13 @@ class Play():
             players = ['player1', 'player2']
             player = 1
             for move in moves:
-                self.board[move[0]][move[1]]['EdgeType'] = player
+                print(move)
+                self.board.board[move[0]][move[1]]['EdgeType'] = player
                 box_added = self.advanced_box(players[player])
                 unstable = True
                 while unstable:
                     scores, unstable = self.score(players[player])
-                    print(self.player_scores)
+                    # print(self.player_scores)
 
                 if not box_added:
                     if player == 0:
@@ -380,7 +391,6 @@ class Play():
                         player = 0
                 else:
                     print('You won a box!!!')
-                self.board.show_board(scores, players[player])
             # print(f'{"Player 1" if scores["player1"] > scores["player2"] else "Player 2"} wins!')
             return scores
 
@@ -501,7 +511,7 @@ class AI_player:
         play_AI = Play(board, opponent='C')
         print(moves)
         self.score = play_AI.play(moves)
-        return(-1 * self.score['player1']) + self.score['player2']
+        return self.score['player2'] - self.score['player1']
 
 Play()
 
