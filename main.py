@@ -634,19 +634,11 @@ class AI_player:
             #print(f'maximum {maximum}')
             return best_move, maximum
 
-    # def heuristic_idea_test(self, board: Board, player, moves):
-    #     AI_play = Play(board)
-    #     # todo: modify the play method in the Play class like in the above class to start at a custom player and play a predefined moves
-    #     AI_play.play(moves)
-    #     AI_play.score()
     def heuristic(self, board: Board, player, moves):
         board_copy = copy.deepcopy(board)
         # print(moves)
         play_AI = Play(board_copy, opponent='C')
-        #play_AI.board.show_board({'player1': 0,  'player2': 0}, player)
 
-        # input('hi')
-        # print(moves)
         score = play_AI.play(moves)
         #play_AI.board.show_board({'player1': 0, 'player2': 0}, player)
         # input('hi')

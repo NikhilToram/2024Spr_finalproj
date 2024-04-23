@@ -21,18 +21,9 @@ Number of players = 2
 -----
 #### Human vs Computer:
 3. When prompted, input the difficulty level of the computer opponent you wish to play against.
-   - For easy, type: 
-     - Easy
-     - easy
-     - 0
-   - For medium, type:
-     - Medium 
-     - medium 
-     - 1
-   - For hard, type:
-     - Hard
-     - hard
-     - 2
+   - For easy, type: 0
+   - For medium, type: 1
+   - For hard, type: 2
 ---
 #### Human vs Human:
 3. You will take turns back and forth between players entering your desired edges.
