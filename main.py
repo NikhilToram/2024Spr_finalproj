@@ -356,6 +356,9 @@ class Play():
 
             elif opp == 'H':
                 self.mode = 'H'
+
+            elif opp != 'H' or opp != 'C':
+                opp = self.opponent()
         except ValueError:
             opp = self.opponent()
         return opp
