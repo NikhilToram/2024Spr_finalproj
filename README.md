@@ -62,7 +62,32 @@ Our Heuristic evaluation function plays a list of moves whose length is constant
 the time complexity is also constant for any given difficulty level. The increase in time complexity for increasing
 complexity level is linearly proportional.
 Profiler efficiancy: 
+complexity level is linearly proportional.
+
+Easy
+3: ~5.6 milliseconds per call count
+4: ~4.3 milliseconds per call count
+5: ~11  milleseconds per call count
+6: ~18  milliseconds per call count
+
+
+Meduim
+3: ~ 5.3 milliseconds per call count
+4: ~ 4.5 milliseconds per call count m
+
+Hard
+3: ~ 5.4 milliseconds per call count
+4: ~ 4.5 milliseconds per call count
 
 #### Targeted Algorithm Analysis: Legal Moves identification function
 The time complexity of the legal moves identification function is proportional to the square of the size of the grid's side.
 i.e., O(n^2), where n is the length of grid's side. 
+3: Easy  : 0.20 milliseconds per call count
+3: Medium: 0.20 milliseconds per call count
+3: Hard  : 0.19 milliseconds per call count
+4: Easy  : 0.18 milliseconds per call count
+4: Medium: 0.18 milliseconds per call count
+4: hard  : 0.17 milliseconds per call count
+4: hard  : 0. milliseconds per call count
+5: Easy  : 0.39 milliseconds per call count
+6: Easy  : 0.72 milliseconds per call count
