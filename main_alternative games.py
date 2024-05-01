@@ -2,7 +2,6 @@ import copy
 import random
 import networkx as nx
 import matplotlib.pyplot as plt
-#import pygame
 import tqdm
 # Create the triangular lattice graph (3 rows, 5 columns)
 
@@ -648,16 +647,8 @@ class AI_player:
     #     AI_play.score()
     def heuristic(self, board: Board, player, moves):
         board_copy = copy.deepcopy(board)
-        # print(moves)
         play_AI = Play(board_copy, opponent='C')
-        #play_AI.board.show_board({'player1': 0,  'player2': 0}, player)
-
-        # input('hi')
-        # print(moves)
         score = play_AI.play(moves)
-        #play_AI.board.show_board({'player1': 0, 'player2': 0}, player)
-        # input('hi')
-        # print(f"Heuristic Score {score['player2']} - {score['player1']}")
         return score['player2'] - score['player1']
 
 Play()

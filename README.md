@@ -57,3 +57,11 @@ Here is an example:
   - Blue: 28
   - Red: 6
 
+#### Targeted Algorithm Analysis: heuristic function evaluation
+Our Heuristic evaluation function is plays a list of moves whose length is constant for a given difficulty level. Thus
+the time complexity is also constant for any given difficulty level. The increase in time complexity for increasing
+complexiity level is linearly proportional.
+
+#### Targeted Algorithm Analysis: Legal Moves identification function
+The time complexity of the legal moves identification function is proportional to the square of the size of the grid's side.
+i.e., O(n^2), where n is the length of grid's side. 
