@@ -65,32 +65,55 @@ Profiler efficiency:
 complexity level is linearly proportional.
 
 Easy
+
 3: ~5.6 milliseconds per call count
+
 4: ~4.3 milliseconds per call count [MacOS]
+
 5: ~6.5  milliseconds per call count [MacOS]
+
 6: ~18  milliseconds per call count
 
 
 Medium
+
 3: ~ 5.3 milliseconds per call count
+
 4: ~ 4.5 milliseconds per call count [MacOS]
+
 5: ~ 6.4 milliseconds per call count [MacOS]
 
+6: ~ __  milliseconds per call count
+
 Hard
+
 3: ~ 5.4 milliseconds per call count
+
 4: ~ 4.5 milliseconds per call count [MacOS]
+
 5: ~ 6.4 milliseconds per call count [MacOS]
+
+6: ~ __  milliseconds per call count
+
 
 #### Targeted Algorithm Analysis: Legal Moves identification function
 The time complexity of the legal moves identification function is proportional to the square of the size of the grid's side.
 i.e., O(n^2), where n is the length of grid's side. 
-3: Easy  : 0.20 milliseconds per call count
-3: Medium: 0.20 milliseconds per call count
-3: Hard  : 0.19 milliseconds per call count
-4: Easy  : 0.18 milliseconds per call count [MacOS]
-4: Medium: 0.18 milliseconds per call count [MacOS]
-4: Hard  : 0.17 milliseconds per call count [MacOS]
-5: Easy  : 0.26 milliseconds per call count [MacOS]
-5: Medium: 0.27 milliseconds per call count [MacOS]
-5: Hard  : 0.25 milliseconds per call count [MacOS]
-6: Easy  : 0.72 milliseconds per call count 
+
+3x3: 
+- Easy  : 0.20 milliseconds per call count
+- Medium: 0.20 milliseconds per call count
+- Hard  : 0.19 milliseconds per call count
+
+4x4:
+- Easy  : 0.18 milliseconds per call count [MacOS]
+- Medium: 0.18 milliseconds per call count [MacOS]
+- Hard  : 0.17 milliseconds per call count [MacOS]
+
+5x5:
+- Easy  : 0.26 milliseconds per call count [MacOS]
+- Medium: 0.27 milliseconds per call count [MacOS]
+- Hard  : 0.25 milliseconds per call count [MacOS]
+
+6x6:
+- Easy  : 0.72 milliseconds per call count 
