@@ -9,7 +9,7 @@ import tqdm
 class Board:
     def __init__(self):
         self.style_dict = {'player1': 'solid', 'player2': 'solid', 'unplayed': 'dashed', 'unplayable': 'solid'}
-        self.color_dict = {'player1': 'red', 'player2': 'lightskyblue', 'unplayed': 'black', 'unplayable': 'white'}
+        self.color_dict = {'player1': 'red', 'player2': 'skyblue', 'unplayed': 'black', 'unplayable': 'white'}
         self.label_edge_dict = {'player1': False, 'player2': False, 'unplayed': True, 'unplayable': False}
         self.dim = self.select_dimension()
         self.edge_number_dict = {}
@@ -103,7 +103,7 @@ class Board:
         nx.draw_networkx(regular_lattice, pos=pos, with_labels=False, node_color='darkgrey', node_size=50,
                          edge_color=[self.color_dict[Edge] for Edge in EdgeType], nodelist = initial_nodes,
                          node_shape= 'o',
-                         font_size=5, style=[self.style_dict[Edge] for Edge in EdgeType])
+                         font_size=5, style=[self.style_dict[Edge] for Edge in EdgeType], width = 2)
         nx.draw_networkx_edge_labels(regular_lattice, pos, edge_labels=self.edge_number_dict,
                                      font_color='black', font_size=([12 if self.dim[0] < 6 else 8 if self.dim[0]<=9 else 5][0]), font_weight='bold', rotate=0)
         nx.draw_networkx_nodes(regular_lattice, pos, nodelist=circle, node_shape='o', label=False, node_color='purple',
@@ -134,7 +134,7 @@ class Board:
         #print(NodeShape)
         nx.draw_networkx(self.board, pos=self.positions, with_labels=False, node_color='darkgrey', node_size=50,
                          edge_color=[self.color_dict[Edge] for Edge in EdgeType],
-                         nodelist=self.initial_nodes,node_shape='o',
+                         nodelist=self.initial_nodes, node_shape='o', width=2,
                          font_size=5, style=[self.style_dict[Edge] for Edge in EdgeType])
         nx.draw_networkx_edge_labels(self.board, self.positions,
                                      edge_labels={edge: self.edge_number_dict[edge] for edge in self.edge_numbers if
@@ -215,7 +215,9 @@ class Play():
         elif self.mode == 'C' and player == 'player2':
             move, _ = self.AI.MiniMax(copy.deepcopy(self.board), self.difficulty,
                                       moves=self.board.legal_move_edges(self.board.board))
-            print(f'Ai move: {move}')
+            if move not in self.board.edge_number_dict.keys():
+                move = (move[1], move[0])
+            print(f'AI move: {self.board.edge_number_dict[move]}')
             # self.board.show_board({'player1': 0,  'player2': 0}, player)
             # input(f'')
             self.board.board[move[0]][move[1]]['EdgeType'] = player
@@ -438,6 +440,9 @@ class AI_player:
                 depth = 4
             elif diff == 2:
                 depth = 5
+            elif diff > 2 or diff < 0 or type(diff) != int:
+                print('Invalid difficulty selection. Try again!')
+                return self.difficulty()
             return depth
         except ValueError:
             return self.difficulty()
