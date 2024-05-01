@@ -61,7 +61,7 @@ Here is an example:
 Our Heuristic evaluation function plays a list of moves whose length is constant for a given difficulty level. Thus
 the time complexity is also constant for any given difficulty level. The increase in time complexity for increasing
 complexity level is linearly proportional.
-Profiler efficiancy: 
+Profiler efficiency: 
 complexity level is linearly proportional.
 
 Easy
