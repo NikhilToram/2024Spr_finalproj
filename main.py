@@ -186,7 +186,11 @@ class Play():
         :param legal_moves: the valid moves at the turn when this is called
         :return:
         """
-        selection = int(input('Make a move. Enter the edge number of the move you want to play: '))
+        while True:
+            selection = input('Make a move. Enter the edge number of the move you want to play: ')
+            if not selection == '':
+                break
+        selection = int(selection)
         if selection > ((((self.board.dim[0])*(self.board.dim[1]-1))*2)-1):
             while selection > ((((self.board.dim[0])*(self.board.dim[1]-1))*2)-1):
                 selection = int(input("That move doesn't exist on this board. Try Again!"))

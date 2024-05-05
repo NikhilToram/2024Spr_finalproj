@@ -2,9 +2,13 @@
 ## A strategic variation of Dots and Boxes
 ### Members: Veera Toram and Tali Zacks
 
-For our version of the game Dots and Boxes, we will make an irregular grid pattern that has a multiplicity of repeating and non-repeating shapes with varying points {based on the size of the shape captured. Another unique aspect of this game would be that if a player captured the majority of a repeating shape they win all of the equivalent shapes.
+For our version of the game Dots and Boxes, we will make an irregular grid pattern that has a multiplicity of repeating 
+and non-repeating shapes with varying points {based on the size of the shape captured. Another unique aspect of this 
+game would be that if a player captured the majority of a repeating shape they win all the equivalent shapes.
 
-We are open to evaluating and testing various algorithms based on the final size of the puzzle, but we do think a minimax-based algorithm and alpha-beta pruning and/or localized gameplays based on the unique shape would be a good fit. We intend to utilize the features of Network X for this project.
+We are open to evaluating and testing various algorithms based on the final size of the puzzle, but we do think a 
+minimax-based algorithm and alpha-beta pruning and/or localized gameplays based on the unique shape would be a good fit.
+We intend to utilize the features of Network X for this project.
 
 ## References: 
 <ul>
@@ -12,6 +16,17 @@ We are open to evaluating and testing various algorithms based on the final size
   <li>A project dealing with a traditional Dots and Boxes game: https://github.com/Armando8766/Dots-and-Boxes.git</li>
   <li>Pattern theory: https://www.youtube.com/watch?v=48sCx-wBs34</li>
 </ul>
+
+## Two Variations:
+### [recommended] Only one chance per player:
+This more improved version restricts players to one chance per turn even if you win a box. This variation allows players
+to play in a more strategic give-and-take fashion.
+To play this final version run main_alternative games.py
+
+### Get another chance on winning:
+The first version of this game is built to give you another chance everytime you capture a box, this however means that
+the game will collapse rapidly after all no-win moves are played. 
+To test this version play main.py.
 
 ## RULES OF THE GAME
 Number of players = 2
@@ -83,7 +98,7 @@ Medium
 
 5: ~ 6.4 milliseconds per call count [MacOS]
 
-6: ~ __  milliseconds per call count
+6: ~ 13.3  milliseconds per call count
 
 Hard
 
@@ -93,7 +108,7 @@ Hard
 
 5: ~ 6.4 milliseconds per call count [MacOS]
 
-6: ~ __  milliseconds per call count
+6: ~ 14.8  milliseconds per call count
 
 
 #### Targeted Algorithm Analysis: Legal Moves identification function
@@ -117,3 +132,5 @@ i.e., O(n^2), where n is the length of grid's side.
 
 6x6:
 - Easy  : 0.72 milliseconds per call count 
+- Medium: 0.52 milliseconds per call count
+- Medium: 0.53 milliseconds per call count
